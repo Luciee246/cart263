@@ -28,7 +28,6 @@ function draw() {
     mouseHover();
 
     while (counter < 10) {
-        greyCircles();
         radius += 10;
         ellipseAlpha += 2;
         counter++;
