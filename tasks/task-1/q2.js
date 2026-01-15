@@ -2,27 +2,15 @@
 
 function setup() {
     createCanvas(600, 600);
-
-    drawEllipse();
-    drawEllipse();
-    drawEllipse();
 }
 
 function draw() {
     background(50, 100, 200);
 
-
-}
-
-function drawEllipse() {
     push();
     noStroke();
-    x: 20;
-    y: 20;
-    size: 20;
-    r: 200;
-    g: 180;
-    b: 100;
+    fill(200, 180, 100);
+    ellipse(20, 20, 20);
     pop();
 
     push();
