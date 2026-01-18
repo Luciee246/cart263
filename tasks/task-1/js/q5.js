@@ -25,6 +25,10 @@ function draw() {
     displaySquare();
     mouseHover();
 
+    if (counter >= 10) {
+        counter = 0;
+    }
+
     if (counter >= 1 && counter <= 10) {
         let i = 0;
         let currentRadius = radius;
