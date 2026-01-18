@@ -1,13 +1,13 @@
 "use strict";
 
+let counter = 0;
+let radius = 50;
+let ellipseAlpha = 50;
+
+
 function setup() {
     createCanvas(600, 600);
 }
-
-let counter = 0;
-
-let radius = 0;
-let ellipseAlpha = 50;
 
 const rect1 = {
     w: 40,
@@ -19,18 +19,25 @@ const rect1 = {
     b: 0
 }
 
-
 function draw() {
     background(0);
 
     displaySquare();
-    mousePressed();
     mouseHover();
 
-    while (counter < 10) {
-        radius += 10;
-        ellipseAlpha += 2;
-        counter++;
+    if (counter >= 1 && counter <= 10) {
+        let i = 0;
+        let currentRadius = radius;
+        let currentAlpha = ellipseAlpha;
+
+        while (i < counter) {
+            fill(255, 255, 255, currentAlpha);
+            ellipse(width / 2, height / 2, currentRadius);
+
+            currentRadius += 30;
+            currentAlpha += 5;
+            i++;
+        }
     }
 }
 
@@ -38,12 +45,12 @@ function displaySquare() {
     push();
     noStroke();
     fill(rect1.r, rect1.g, rect1.b);
-    rect(rect1.x, rect1.y, rect1.w);
+    rect(rect1.x, rect1.y, rect1.w, rect1.h);
     pop();
 }
 
 function mousePressed() {
-    if (checkCollisionWithSquare()) {
+    if (checkCollisionWithSquare() && counter < 10) {
         counter++;
         console.log("Collision with square");
     }
@@ -69,12 +76,4 @@ function checkCollisionWithSquare() {
     } else {
         return false;
     }
-}
-
-function greyCircles() {
-    push();
-    noStroke();
-    fill(255, 255, 255, ellipseAlpha);
-    ellipse(width / 2, height / 2, radius);
-    pop();
 }
