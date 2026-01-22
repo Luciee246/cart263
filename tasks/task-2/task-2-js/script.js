@@ -85,43 +85,43 @@ function setup() {
     /*************************************** */
     /* 1: Select the first paragraph and replace the text within the paragraph... */
     /***CODE */
-    let firstParagraph = document.querySelector("p");
-    firstParagraph.textContent = "New text in paragraph one: text changed by `Lucie` on the following date: " + new Date() + ".";
+    // let firstParagraph = document.querySelector("p");
+    // firstParagraph.textContent = "New text in paragraph one: text changed by `Lucie` on the following date: " + new Date() + ".";
     /*************************************** */
     /* 2: Select all elements in the HTML that have the class name content-container
      and change the background color ... of first and second ...*/
     /***CODE */
-    let contentContainers = document.querySelectorAll(".content-container");
-    contentContainers[0].style.backgroundColor = "orange";
-    contentContainers[1].style.backgroundColor = "purple";
+    // let contentContainers = document.querySelectorAll(".content-container");
+    // contentContainers[0].style.backgroundColor = "orange";
+    // contentContainers[1].style.backgroundColor = "purple";
 
     /*************************************** */
     /* 3: Change the src element of the first image element on the page to be ...
     /***CODE */
-    let firstImage = document.querySelector("img");
-    firstImage.src = "task-2-images/seven.png";
+    // let firstImage = document.querySelector("img");
+    // firstImage.src = "task-2-images/seven.png";
 
     /*************************************** */
     /* 4: Select the third paragraph element on the page and
     replace the content (within the paragraph) to be an h2 element which contains the text `TEST 123`
     /***CODE */
-    let thirdParagraph = document.querySelectorAll("p")[2];
-    thirdParagraph.innerHTML = "<h2>TEST 123</h2>";
+    // let thirdParagraph = document.querySelectorAll("p")[2];
+    // thirdParagraph.innerHTML = "<h2>TEST 123</h2>";
 
     /*************************************** */
     /* 5: Select the fourth paragraph element on the page and
     add to the existing content an h2 element containing the text `TEST 123`
     /***CODE */
-    let fourthParagraph = document.querySelectorAll("p")[3];
-    fourthParagraph.innerHTML += "<h2>TEST 123</h2>";
+    // let fourthParagraph = document.querySelectorAll("p")[3];
+    // fourthParagraph.innerHTML += "<h2>TEST 123</h2>";
 
     /*************************************** */
     /* 6: Select the fifth paragraph element on the page and add to the existing content
     an img element that holds `one.png`, and add the class newStyle to said paragraph element.
     /***CODE */
-    let fifthParagraph = document.querySelectorAll("p")[4];
-    fifthParagraph.innerHTML += '<img class="newStyle" src="task-2-images/one.png">';
-    fifthParagraph.classList.add("newStyle");
+    // let fifthParagraph = document.querySelectorAll("p")[4];
+    // fifthParagraph.innerHTML += '<img class="newStyle" src="task-2-images/one.png">';
+    // fifthParagraph.classList.add("newStyle");
 
 
     /*************************************** */
@@ -132,11 +132,11 @@ function setup() {
     (i.e. colors[0] should be allocated to the first innerContainers element, colors[1] to the second, etc ...) 
     a background using that color.
     /***CODE */
-    let colors = ['red', 'blue', 'green', 'orange'];
-    let innerContainers = document.querySelectorAll(".inner-container");
-    for (let i = 0; i < colors.length; i++) {
-        innerContainers[i].style.backgroundColor = colors[i];
-    }
+    // let colors = ['red', 'blue', 'green', 'orange'];
+    // let innerContainers = document.querySelectorAll(".inner-container");
+    // for (let i = 0; i < colors.length; i++) {
+    //     innerContainers[i].style.backgroundColor = colors[i];
+    // }
 
     /*************************************** */
     /*** END PART TWO MODIFY */
@@ -153,26 +153,37 @@ function setup() {
     /* 1E:  Set the background of this paragraph element to be green */
     /* 1F:  Set the color of the text in this paragraph element to be white */
     /* 1G: Append this new element to the parent variable within the function. */
-    /* 1H: Iterate through the allPTagsThree array and call customCreateElement(), 
+    /* 1H: Iterate through the allPTagsThree array and call customCreateElement(),
     passing the current allPTagsThree element as the parent with each iteration.*/
     /***CODE */
+    let allPTagsThree = document.querySelectorAll("p");
 
+    function customCreateElement(parent) {
+        let newElement = document.createElement("p");
+        newElement.textContent = "using create element";
+        newElement.style.backgroundColor = "green";
+        newElement.style.color = "white";
+        parent.appendChild(newElement);
+    }
+
+    for (let i = 0; i < allPTagsThree.length; i++) {
+        customCreateElement(allPTagsThree[i]);
+    }
 
     /***EXPLANATION::
-     * 
-     * 
+     * By using a for loop to iterate through all paragraph elements on the page, we created a new paragraph element for each existing one, and appending it to the same parent.
      */
 
     /*************************************** */
     /* 2: GRID OF BOXES */
     /* 2A: Create another new function: function customNewBoxCreate(parent){ //body }*/
-    /* 2B: In the body of customNewBoxCreate create a new div element, that has the class testDiv. 
+    /* 2B: In the body of customNewBoxCreate create a new div element, that has the class testDiv.
     /* 2C:Then append this new element to the parent variable within the function. 
     /* 2D:Finally, return</code> this new element */
-    /* 2E:Create a nested for loop (for rows and columns) to iterate through 10 columns and 10 rows (just like the JS Review :)). 
+    /* 2E:Create a nested for loop (for rows and columns) to iterate through 10 columns and 10 rows (just like the JS Review :)).
         Call the customNewBoxCreate function, in order to generate a new div -> representing each cell in the grid. 
         Ensure that the parent element for each of these new divs is the element whose id is named `new-grid`*/
-    /* 2F: You will see at this point that the x,y position of the resulting divs makes no sense... 
+    /* 2F: You will see at this point that the x,y position of the resulting divs makes no sense...
         Fix this by doing the following: every time you call customNewBoxCreate() - save the current returned element 
         in a variable i.e. returnedDiv. 
         Set the style (left and top) to the of this element to 
@@ -181,36 +192,69 @@ function setup() {
     /* 2G: BONUS I: Make every div in the resulting grid in an even numbered row have white background 
         and otherwise let it have a background of purple.</li>
     /* 2H: BONUS II: For every div in an even numbered row make it contain the text `EVEN`, 
-        otherwise lat it have the content `ODD`.*/
+        otherwise let it have the content `ODD`.*/
 
     /***CODE */
+    function customNewBoxCreate(content) {
+        let newDiv = document.createElement("div");
+        newDiv.classList.add("testDiv");
+        content.appendChild(newDiv);
+        return newDiv;
+    }
 
+    for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+            let content = document.querySelector('#new-grid');
+            let returnedDiv = customNewBoxCreate(content);
+            returnedDiv.style.left = (j * 50) + "px";
+            returnedDiv.style.top = (i * 50) + "px";
+        }
+    }
+
+    console.log(document.querySelectorAll(".testDiv"));
 
     /***EXPLANATION::
-     * 
-     * 
+     * By using a nested for loop, we created a grid of elements, and a console log confirms that 100 divs with the class "testDiv" have been created.
      */
 
     /*************************************** */
     /* 3: GRID OF BOXES II */
 
-    /* 3A: Create ANOTHER nested for loop - in order to generate a new grid ... 
+    /* 3A: Create ANOTHER nested for loop - in order to generate a new grid ...
         USE the same customNewBoxCreate function..., the only difference is that the parent element 
         for each of these new divs is the element whose id is `new-grid-three`. */
-    /* 3B: Then: write the code to check when a column is a multiple of 3 (no remainder), 
+    /* 3B: Then: write the code to check when a column is a multiple of 3 (no remainder),
         when it is a column where the remainder is 1 or when the remainder is 2 ... 
         HINT:: look up the % operator.. */
-    /* 3C: Then for each of the above cases: give the new divs in the first case a background of red, 
+    /* 3C: Then for each of the above cases: give the new divs in the first case a background of red,
             then the second a background of orange and the third yellow. */
-    /*  3D: Finally, let each div contain the text content representing the associated remainder 
+    /*  3D: Finally, let each div contain the text content representing the associated remainder
         when dividing by three. */
 
     /***CODE */
+    for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+            let content = document.querySelector('#new-grid-three');
+            let returnedDiv = customNewBoxCreate(content);
+            returnedDiv.style.left = (j * 50) + "px";
+            returnedDiv.style.top = (i * 50) + "px";
+
+            if (j % 3 === 0) {
+                returnedDiv.style.backgroundColor = "red";
+                returnedDiv.textContent = "0";
+            } else if (j % 3 === 1) {
+                returnedDiv.style.backgroundColor = "orange";
+                returnedDiv.textContent = "1";
+            } else {
+                returnedDiv.style.backgroundColor = "yellow";
+                returnedDiv.textContent = "2";
+            }
+        }
+    }
 
 
     /***EXPLANATION::
-     * 
-     * 
+     * By using a nested for loop and the % operator, we created a grid of divs with different background colors and text content based on the remainders.
      */
 
     /*************************************** */
