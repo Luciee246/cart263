@@ -1,0 +1,35 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    position: relative;
+    background-color: bisque;
+    display: flex;
+    flex-direction: column;
+
+}
+
+h1 {
+    padding: 30px;
+    top: 0;
+    text-align: center;
+    position: relative;
+    font-family: "Bitcount Single", system-ui;
+    font-size: 5rem;
+    font-weight: 500;
+    color: #D92121;
+}
+
+input {
+    outline: none;
+    border: none;
+    background: none;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    background: rgb(255, 255, 255, 0.2);
+    width: 500px
+}
