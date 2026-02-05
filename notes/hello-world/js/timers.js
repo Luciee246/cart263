@@ -27,6 +27,7 @@ window.onload = function () {
 }
 
 let num = 24;
+let gridCells = document.querySelectorAll(".grid-cell");
 let currentShade = 0;
 for (let index = 0; index < gridCells.length; index++) {
     //check if we reach the 24th
