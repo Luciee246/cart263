@@ -48,6 +48,28 @@ function setup_A() {
   function aniB(parentCanvas) {
     console.log("in ani-B -teamA");
 
+    let container = document.createElement("div");
+    container.className = "TEAM_A_ANI_B_container";
+    parentCanvas.appendChild(container);
+
+    for (let i = 0; i < 20; i++) {
+      let circle = document.createElement("div");
+      circle.className = "TEAM_A_ANI_B_circle";
+
+      circle.addEventListener("mouseover", function () {
+        circle.style.backgroundColor = "#787ef8"; // soft lavender
+        circle.style.opacity = "1";
+        circle.style.transform = "scale(1.1)";
+      });
+
+      circle.addEventListener("mouseout", function () {
+        circle.style.backgroundColor = "#35f0f3"; // calm blue
+        circle.style.opacity = "1";
+        circle.style.transform = "scale(1)";
+      });
+
+      container.appendChild(circle);
+    }
   }
   /****************ANI C ************************************ */
   /** PUT ALL YOUR CODE FOR INTERACTIVE PATTERN C INSIDE HERE */

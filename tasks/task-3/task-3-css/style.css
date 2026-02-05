@@ -169,6 +169,25 @@ h5 {
 
 
 /*CSS TEAM A**/
+
+
+.TEAM_A_ANI_B_container {
+  display: grid;
+  grid-template-columns: repeat(5, 55px);
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+  padding-right: 15px;
+}
+
+.TEAM_A_ANI_B_circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: #bde0fe;
+  transition: all 1s ease;
+}
+
 .TEAM_A_c-word {
   font-size: 20px;
   color: rgb(35, 14, 121);
