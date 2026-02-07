@@ -1,14 +1,14 @@
+
 ant-tanager
 bird-of-paradise
 blue-jay
 brush-turkey
-buzzard-eagle	
+buzzard-eagle
 cage-bird
 canary-flycatcher
 chuck-will’s-widow
 cock-of-the-rock
 crab-plover
-cuckoo-pint
 dapple-throat
 drongo-cuckoo
 emu-wren
@@ -79,7 +79,7 @@ robin-chat
 chat-tyrant
 cordon-bleu
 gang-gang
-sabia-laranjeira 
+sabia-laranjeira
 flycatcher-shrike
 ant-tanagers
 birds-of-paradise
@@ -91,7 +91,6 @@ canary-flycatchers
 chuck-will’s-widows
 cocks-of-the-rock
 crab-plovers
-cuckoo-pints
 dapple-throats
 drongo-cuckoos
 emu-wrens
@@ -321,7 +320,6 @@ quail
 chicken
 hen
 rooster
-cock
 shrike
 swallow
 sparrow
@@ -335,6 +333,8 @@ xenop
 warbler
 yellowhammer
 cockatoo
+cuckoo
+canaries
 seagulls
 ducks
 pigeons
@@ -381,7 +381,6 @@ puffins
 quails
 hens
 roosters
-cocks
 shrikes
 swallows
 sparrows
@@ -395,3 +394,5 @@ xenops
 warblers
 yellowhammers
 cockatoos
+cuckoos
+canaries
