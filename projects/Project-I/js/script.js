@@ -17,43 +17,46 @@ window.onload = setup;
 
 function setup() {
     let birds = "";
+    let words = "";
+    let dinos = "";
     let prompt;
+    let dictionary = "";
 
-    fetch('../dictionaries/birds.txt')
+    fetch('../dictionaries/words.txt')
     .then(response => response.text())
     .then((data) => {
-        birds = data;
+        words = data;
+        // set dictionary to be words as default
+        dictionary = words;
         prompt = newPrompt();
     })
     .catch(error => console.error('Error fetching data:', error));
 
-
-    fetch('../dictionaries/words.txt')
-        .then(response => response.text())
-        .then((data) => {
-            words = data;
-            prompt = newPrompt();
-        })
-        .catch(error => console.error('Error fetching data:', error));
-
     
+    fetch('../dictionaries/birds.txt')
+    .then(response => response.text())
+    .then((data) => {
+        birds = data;
+    })
+    .catch(error => console.error('Error fetching data:', error));
+
+    fetch('../dictionaries/dinosaurs.txt')
+    .then(response => response.text())
+    .then((data) => {
+        dinos = data;
+    })
+    .catch(error => console.error('Error fetching data:', error));
+
+
+
 
     let textInput = document.querySelector('#textInput');
     textInput.addEventListener("keydown", function (e) {
         if (e.which === 13) {
-            // prompt = document.querySelector('.prompt').textContent.toLowerCase();
-            // const answer = document.querySelector()
-            // if (answer.includes(prompt) && birds.includes(textInput.value)) {
-            //     console.log("correct");
-            // }
-            // console.log(birds);
-            // const birds = birds2.toLowerCase();
-
+            const dict = dictionary.toLowerCase();
             const answer = textInput.value.toLowerCase();
-            const result = birds.includes("\n" + answer + "\r");
+            const result = dict.includes("\n" + answer + "\r");
             const checkInclude = answer.includes(prompt);
-            
-
 
             if (result == true && checkInclude == true) {
                 console.log("correct");
@@ -62,9 +65,9 @@ function setup() {
             }
 
             else {
-                textInput.style.color = "red";
-                setTimeout(function() {
-                    textInput.style.color = "black";
+                textInput.style.color = "var(--tertiary)";
+                setTimeout(function () {
+                    textInput.style.color = "var(--primary)";
                 }, 500)
             }
         }
@@ -72,9 +75,9 @@ function setup() {
 
     function newPrompt() {
         let prompt = bigrams[Math.floor(Math.random() * (bigrams.length + 1))][0];
-        
+
         // trying to make it cycle through until it picks a bigram that is included in the bird list
-        while (birds.includes(prompt) == false) {
+        while (dictionary.includes(prompt) == false) {
             prompt = bigrams[Math.floor(Math.random() * (bigrams.length + 1))][0];
         }
 
@@ -82,4 +85,21 @@ function setup() {
         document.querySelector('.prompt').textContent = prompt.toUpperCase();
         return prompt;
     }
+
+    document.querySelector("#dropdown").addEventListener('change', function () {
+        console.log(this.value);
+        
+
+        if (this.value == "normal") {
+            dictionary = words;
+        }
+        else if (this.value == "birds") {
+            dictionary = birds;
+        }
+        else if (this.value == "dinosaurs") {
+            dictionary = dinos;
+        }
+
+        newPrompt();
+    })
 }
