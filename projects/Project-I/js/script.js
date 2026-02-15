@@ -1,5 +1,5 @@
 /**
- * Word nerd
+ * Word game
  * Lucie Soussana, Jake Hayduk
  * 
  * A game of making words with the bigrams given
@@ -10,6 +10,7 @@
  * - Get a high score before time runs out!
  * 
  */
+
 
 "use strict";
 
@@ -82,12 +83,15 @@ function setup() {
             prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
         }
 
-
+        // console.log((10 / difficulty ** 2) + 0.9);
+        // console.log(bigrams[Math.round((bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0]);
         document.querySelector('.prompt').textContent = prompt.toUpperCase();
         return prompt;
     }
 
-    document.querySelector("#dropdown").addEventListener('change', function () {
+
+
+    document.querySelector("#dropdown").addEventListener("change", function () {
         console.log(this.value);
 
 
@@ -104,9 +108,8 @@ function setup() {
         newPrompt();
     })
 
-    document.querySelector(".slider").addEventListener('change', function () {
-        console.log(this.value);
-        document.querySelector(".difficulty p").textContent = "difficulty" + this.value;
+    document.querySelector(".slider").addEventListener("change", function () {
+        document.querySelector(".difficulty p").textContent = "difficulty: " + this.value;
 
         difficulty = this.value;
     })
