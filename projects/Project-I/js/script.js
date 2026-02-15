@@ -19,9 +19,6 @@ function setup() {
     let birds = "";
     let words = "";
     let dinos = "";
-    let t;
-    let scale;
-    let usableLength;
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -78,17 +75,12 @@ function setup() {
     })
 
     function newPrompt() {
-        t = (difficulty - 1) / 9;
-        scale = 1 + (t * t); // Half parabolic function
-        usableLength = Math.max(1, Math.floor(bigrams.length * scale));
-        prompt = bigrams[Math.floor(Math.random() * usableLength)][0];
+        prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
 
-        // trying to make it cycle through until it picks a bigram that is included in the bird list
+        // make it cycle through until it picks a bigram that is included in the bird list
         while (dictionary.includes(prompt) == false) {
-            prompt = bigrams[Math.floor(Math.random() * usableLength)][0];
+            prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
         }
-
-        scale = 0.1 + (1 - 0.1) * (1 - t * t);
 
 
         document.querySelector('.prompt').textContent = prompt.toUpperCase();
