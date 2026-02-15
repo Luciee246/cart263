@@ -11,7 +11,6 @@
  * 
  */
 
-
 "use strict";
 
 window.onload = setup;
@@ -25,29 +24,29 @@ function setup() {
     let difficulty = 1;
 
     fetch('../dictionaries/words.txt')
-        .then(response => response.text())
-        .then((data) => {
-            words = data;
-            // set dictionary to be words as default
-            dictionary = words;
-            prompt = newPrompt();
-        })
-        .catch(error => console.error('Error fetching data:', error));
+    .then(response => response.text())
+    .then((data) => {
+        words = data;
+        // set dictionary to be words as default
+        dictionary = words;
+        prompt = newPrompt();
+    })
+    .catch(error => console.error('Error fetching data:', error));
 
-
+    
     fetch('../dictionaries/birds.txt')
-        .then(response => response.text())
-        .then((data) => {
-            birds = data;
-        })
-        .catch(error => console.error('Error fetching data:', error));
+    .then(response => response.text())
+    .then((data) => {
+        birds = data;
+    })
+    .catch(error => console.error('Error fetching data:', error));
 
     fetch('../dictionaries/dinosaurs.txt')
-        .then(response => response.text())
-        .then((data) => {
-            dinos = data;
-        })
-        .catch(error => console.error('Error fetching data:', error));
+    .then(response => response.text())
+    .then((data) => {
+        dinos = data;
+    })
+    .catch(error => console.error('Error fetching data:', error));
 
 
 
@@ -93,7 +92,7 @@ function setup() {
 
     document.querySelector("#dropdown").addEventListener("change", function () {
         console.log(this.value);
-
+        
 
         if (this.value == "normal") {
             dictionary = words;
