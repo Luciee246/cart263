@@ -1,5 +1,5 @@
 /**
- * Word game
+ * Word nerd
  * Lucie Soussana, Jake Hayduk
  * 
  * A game of making words with the bigrams given
@@ -19,33 +19,37 @@ function setup() {
     let birds = "";
     let words = "";
     let dinos = "";
+    let t;
+    let scale;
+    let usableLength;
     let prompt;
     let dictionary = "";
+    let difficulty = 1;
 
     fetch('../dictionaries/words.txt')
-    .then(response => response.text())
-    .then((data) => {
-        words = data;
-        // set dictionary to be words as default
-        dictionary = words;
-        prompt = newPrompt();
-    })
-    .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.text())
+        .then((data) => {
+            words = data;
+            // set dictionary to be words as default
+            dictionary = words;
+            prompt = newPrompt();
+        })
+        .catch(error => console.error('Error fetching data:', error));
 
-    
+
     fetch('../dictionaries/birds.txt')
-    .then(response => response.text())
-    .then((data) => {
-        birds = data;
-    })
-    .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.text())
+        .then((data) => {
+            birds = data;
+        })
+        .catch(error => console.error('Error fetching data:', error));
 
     fetch('../dictionaries/dinosaurs.txt')
-    .then(response => response.text())
-    .then((data) => {
-        dinos = data;
-    })
-    .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.text())
+        .then((data) => {
+            dinos = data;
+        })
+        .catch(error => console.error('Error fetching data:', error));
 
 
 
@@ -74,12 +78,17 @@ function setup() {
     })
 
     function newPrompt() {
-        let prompt = bigrams[Math.floor(Math.random() * (bigrams.length + 1))][0];
+        t = (difficulty - 1) / 9;
+        scale = 1 + (t * t); // Half parabolic function
+        usableLength = Math.max(1, Math.floor(bigrams.length * scale));
+        prompt = bigrams[Math.floor(Math.random() * usableLength)][0];
 
         // trying to make it cycle through until it picks a bigram that is included in the bird list
         while (dictionary.includes(prompt) == false) {
-            prompt = bigrams[Math.floor(Math.random() * (bigrams.length + 1))][0];
+            prompt = bigrams[Math.floor(Math.random() * usableLength)][0];
         }
+
+        scale = 0.1 + (1 - 0.1) * (1 - t * t);
 
 
         document.querySelector('.prompt').textContent = prompt.toUpperCase();
@@ -88,7 +97,7 @@ function setup() {
 
     document.querySelector("#dropdown").addEventListener('change', function () {
         console.log(this.value);
-        
+
 
         if (this.value == "normal") {
             dictionary = words;
@@ -101,5 +110,12 @@ function setup() {
         }
 
         newPrompt();
+    })
+
+    document.querySelector(".slider").addEventListener('change', function () {
+        console.log(this.value);
+        document.querySelector(".difficulty p").textContent = "difficulty" + this.value;
+
+        difficulty = this.value;
     })
 }
