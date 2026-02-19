@@ -24,29 +24,29 @@ function setup() {
     let difficulty = 1;
 
     fetch('../dictionaries/words.txt')
-    .then(response => response.text())
-    .then((data) => {
-        words = data;
-        // set dictionary to be words as default
-        dictionary = words;
-        prompt = newPrompt();
-    })
-    .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.text())
+        .then((data) => {
+            words = data;
+            // set dictionary to be words as default
+            dictionary = words;
+            prompt = newPrompt();
+        })
+        .catch(error => console.error('Error fetching data:', error));
 
-    
+
     fetch('../dictionaries/birds.txt')
-    .then(response => response.text())
-    .then((data) => {
-        birds = data;
-    })
-    .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.text())
+        .then((data) => {
+            birds = data;
+        })
+        .catch(error => console.error('Error fetching data:', error));
 
     fetch('../dictionaries/dinosaurs.txt')
-    .then(response => response.text())
-    .then((data) => {
-        dinos = data;
-    })
-    .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.text())
+        .then((data) => {
+            dinos = data;
+        })
+        .catch(error => console.error('Error fetching data:', error));
 
 
 
@@ -75,11 +75,11 @@ function setup() {
     })
 
     function newPrompt() {
-        prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
+        prompt = bigrams[Math.floor(Math.random() * (bigrams.length / 10 * difficulty - 1))][0];
 
         // make it cycle through until it picks a bigram that is included in the bird list
         while (dictionary.includes(prompt) == false) {
-            prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
+            prompt = bigrams[Math.floor(Math.random() * (bigrams.length / 10 * difficulty - 1))][0];
         }
 
         // console.log((10 / difficulty ** 2) + 0.9);
@@ -92,7 +92,7 @@ function setup() {
 
     document.querySelector("#dropdown").addEventListener("change", function () {
         console.log(this.value);
-        
+
 
         if (this.value == "normal") {
             dictionary = words;
