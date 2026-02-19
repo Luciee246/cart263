@@ -60,11 +60,22 @@ window.onload = function () {
 
         // add numFlowers at one time
         for (let i = 0; i < garden.numFlowers; i++) {
-            garden.flowers.push(createFlower());
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * 120;
+            let size = Math.random() * 30 + 50;
+            let stemLength = Math.random() * 50 + 50;
+            let petalColor = {
+                r: parseInt(Math.random() * 155) + 100,
+                g: parseInt(Math.random() * 155) + 100,
+                b: parseInt(Math.random() * 155) + 100,
+            };
+
+            let flower = new Flower(x, y, size, stemLength, petalColor);
+            garden.flowers.push(flower);
         }
 
         for (let i = 0; i < garden.flowers.length; i++) {
-            renderFlower(garden.flowers[i]);
+            garden.flowers[i].renderFlower();
 
         }
     }
