@@ -5,9 +5,17 @@
  * A game of making words with the bigrams given
  * 
  * Instructions:
+ * - Choose a theme and difficulty level
  * - Bigrams will appear on the screen
  * - Make words using the bigrams
  * - Get a high score before time runs out!
+ * 
+ * Rule Book:
+ * - Words must be at least 3 letters long
+ * - Words must include the bigram prompt
+ * - 2 seconds will be added to the timer for every correct answer
+ * - Gain 5 points for every letter used
+ * - Gain 10 points for every hyphen placed
  * 
  */
 
