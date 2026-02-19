@@ -21,6 +21,7 @@ function setup() {
     let dinos = "";
     let prompt;
     let dictionary = "";
+    let difficulty = 1;
 
     fetch('../dictionaries/words.txt')
     .then(response => response.text())
@@ -74,19 +75,22 @@ function setup() {
     })
 
     function newPrompt() {
-        let prompt = bigrams[Math.floor(Math.random() * (bigrams.length + 1))][0];
+        prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
 
-        // trying to make it cycle through until it picks a bigram that is included in the bird list
+        // make it cycle through until it picks a bigram that is included in the bird list
         while (dictionary.includes(prompt) == false) {
-            prompt = bigrams[Math.floor(Math.random() * (bigrams.length + 1))][0];
+            prompt = bigrams[Math.floor(Math.random() * (bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0];
         }
 
-
+        // console.log((10 / difficulty ** 2) + 0.9);
+        // console.log(bigrams[Math.round((bigrams.length - 1) / ((10 / difficulty ** 2) + 0.9))][0]);
         document.querySelector('.prompt').textContent = prompt.toUpperCase();
         return prompt;
     }
 
-    document.querySelector("#dropdown").addEventListener('change', function () {
+
+
+    document.querySelector("#dropdown").addEventListener("change", function () {
         console.log(this.value);
         
 
@@ -101,5 +105,11 @@ function setup() {
         }
 
         newPrompt();
+    })
+
+    document.querySelector(".slider").addEventListener("change", function () {
+        document.querySelector(".difficulty p").textContent = "difficulty: " + this.value;
+
+        difficulty = this.value;
     })
 }
