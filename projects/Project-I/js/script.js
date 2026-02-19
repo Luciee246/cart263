@@ -59,7 +59,7 @@ function setup() {
             const result = dict.includes("\n" + answer + "\r");
             const checkInclude = answer.includes(prompt);
 
-            if (result == true && checkInclude == true) {
+            if (result == true && checkInclude == true && answer.length > 2) {
                 console.log("correct");
                 textInput.value = "";
                 prompt = newPrompt();
@@ -77,7 +77,7 @@ function setup() {
     function newPrompt() {
         prompt = bigrams[Math.floor(Math.random() * (bigrams.length / 10 * difficulty - 1))][0];
 
-        // make it cycle through until it picks a bigram that is included in the bird list
+        // make it cycle through until it picks a bigram that is included in the various lists
         while (dictionary.includes(prompt) == false) {
             prompt = bigrams[Math.floor(Math.random() * (bigrams.length / 10 * difficulty - 1))][0];
         }
@@ -111,5 +111,21 @@ function setup() {
         document.querySelector(".difficulty p").textContent = "difficulty: " + this.value;
 
         difficulty = this.value;
+    })
+
+    // Buttons
+
+    let timer = 60;
+
+    document.querySelector(".play-button").addEventListener("click", function () {
+        this.style.display = "none";
+        document.querySelector(".gameplay").style.display = "flex";
+        timer = 60;
+        setInterval(function () {
+            if (timer > 0) {
+                timer--;
+                document.querySelector(".timer").textContent = timer;
+            }
+        }, 1000)
     })
 }
