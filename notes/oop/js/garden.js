@@ -18,16 +18,7 @@ window.onload = function () {
                 b: 240,
             },
             skyDiv: document.createElement("div"),
-        },
-        sun: {
-            sunColor: {
-                r: 240,
-                g: 206,
-                b: 83,
-            },
-            //the sun element
-            sunDiv: document.createElement("div"),
-        },
+        }
     };
 
     function createAndRenderTheGarden() {
@@ -39,14 +30,14 @@ window.onload = function () {
             )`;
         document.getElementsByTagName("main")[0].appendChild(garden.sky.skyDiv);
 
-        garden.sun.sunDiv.classList.add("sun");
-        garden.sun.sunDiv.style.background = `rgb(
-            ${garden.sun.sunColor.r},
-            ${garden.sun.sunColor.g},
-            ${garden.sun.sunColor.b}
-            )`;
-        //append to the SKY div
-        document.getElementsByClassName("sky")[0].appendChild(garden.sun.sunDiv);
+
+        let sun = new Sun(10, 10, { r: 240, g: 206, b: 83 });
+        sun.renderSun();
+
+        window.addEventListener("keydown", function handleKeyDown(event) {
+            //call the handleKeyDown method in sun
+            sun.handleKeyDownInSun(event);
+        });
 
         //grass
         garden.grass.grassDiv.classList.add("grass");
