@@ -4,11 +4,17 @@ class Bee {
         this.y = y;
         this.beeSize = beeSize;
         this.beehive = beeHive;
+        this.isAtHome = false;
         this.beeImg = document.createElement("img");
         this.vx = 5;
         this.vy = 5;
 
         let self = this;
+        let random = Math.floor(Math.random() * 10000) + 5000;
+
+        setInterval(function () {
+            self.beeHome();
+        }, random);
 
         function animateBee() {
             self.animateBee();
@@ -38,6 +44,24 @@ class Bee {
         }
         if (this.y > window.innerHeight - this.beeSize || this.y < 0) {
             this.vy = -this.vy;
+        }
+    }
+
+    // Sends the bees home at random intervals, and sends them back out after random time
+    beeHome() {
+        this.x = this.beehive.x + this.beehive.size / 2 - this.beeSize / 2;
+        this.y = this.beehive.y + this.beehive.size / 2 - this.beeSize / 2;
+
+        if (this.isAtHome) {
+            this.isAtHome = false;
+            this.vx = Math.floor(Math.random() * 8) + 3;
+            this.vy = Math.floor(Math.random() * 8) + 3;
+        }
+
+        else {
+            this.isAtHome = true;
+            this.vx = 0;
+            this.vy = 0;
         }
     }
 }
