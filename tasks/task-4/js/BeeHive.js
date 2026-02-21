@@ -5,7 +5,7 @@ class BeeHive {
         this.size = size;
         this.color = color;
 
-        this.beeHiveDiv = document.createElement("div");
+        this.beehiveDiv = document.createElement("div");
         this.bees = [];
 
         this.floatOffset = 0;
@@ -14,9 +14,13 @@ class BeeHive {
 
     renderBeeHive() {
 
-        this.beeHiveDiv.classList.add("beehive");
-        this.beeHiveDiv.style.left = this.x + "px";
-        this.beeHiveDiv.style.top = this.y + "px";
+        this.beehiveDiv.classList.add("beehive");
+        this.beehiveDiv.style.left = this.x + "px";
+        this.beehiveDiv.style.top = this.y + "px";
+        this.beehiveDiv.style.width = this.size + "px";
+        this.beehiveDiv.style.height = this.size + "px";
+        this.beehiveDiv.style.position = "absolute";
+        this.beehiveDiv.style.zIndex = 1;
 
         // create 6 hexagons
         let positions = [
@@ -34,6 +38,10 @@ class BeeHive {
 
             hex.style.left = pos.x + "px";
             hex.style.top = pos.y + "px";
+            hex.style.width = (this.size / 2) + "px";
+            hex.style.height = (this.size / 2) + "px";
+            hex.style.position = "absolute";
+            hex.style.clipPath = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
 
             hex.style.backgroundColor =
                 `rgb(${this.color.r},${this.color.g},${this.color.b})`;
@@ -41,11 +49,11 @@ class BeeHive {
             hex.style.setProperty('--hex-color',
                 `rgb(${this.color.r},${this.color.g},${this.color.b})`);
 
-            this.beeHiveDiv.appendChild(hex);
+            this.beehiveDiv.appendChild(hex);
         }
 
-        document.querySelector(".grass")
-            .appendChild(this.beeHiveDiv);
+        document.querySelector(".sky")
+            .appendChild(this.beehiveDiv);
 
         this.animateHive();
         this.addClickEvent();
@@ -60,7 +68,7 @@ class BeeHive {
                 this.floatDirection *= -1;
             }
 
-            this.beeHiveDiv.style.transform =
+            this.beehiveDiv.style.transform =
                 `translateY(${this.floatOffset}px)`;
 
             requestAnimationFrame(animate);
@@ -86,7 +94,7 @@ class BeeHive {
     }
 
     addClickEvent() {
-        this.beeHiveDiv.addEventListener("click", () => {
+        this.beehiveDiv.addEventListener("click", () => {
 
             let existing = document.querySelector(".bee-count");
             if (existing) existing.remove();

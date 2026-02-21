@@ -3,7 +3,7 @@ class Bee {
         this.x = x;
         this.y = y;
         this.beeSize = beeSize;
-        this.beeHive = beeHive;
+        this.beehive = beeHive;
         this.beeImg = document.createElement("img");
         this.vx = 5;
         this.vy = 5;

@@ -44,6 +44,7 @@ window.onload = function () {
     //sky
     garden.sky.skyDiv.classList.add("sky");
     garden.sky.skyDiv.style.background = `rgb(${garden.sky.skyColor.r},${garden.sky.skyColor.g},${garden.sky.skyColor.b})`;
+
     document.getElementsByTagName("main")[0].appendChild(garden.sky.skyDiv);
 
     //sun
@@ -55,8 +56,9 @@ window.onload = function () {
     garden.grass.grassDiv.style.background = `rgb(${garden.grass.grassColor.r},${garden.grass.grassColor.g},${garden.grass.grassColor.b})`;
     document.getElementsByTagName("main")[0].appendChild(garden.grass.grassDiv);
 
-    let hive1 = new BeeHive(200, 350, 1, { r: 230, g: 180, b: 60 });
-    let hive2 = new BeeHive(600, 360, 1, { r: 240, g: 190, b: 70 });
+
+    let hive1 = new BeeHive(200, 350, 100, { r: 230, g: 180, b: 60 });
+    let hive2 = new BeeHive(600, 360, 120, { r: 240, g: 190, b: 70 });
 
     garden.beeHives.push(hive1);
     garden.beeHives.push(hive2);
@@ -106,7 +108,7 @@ window.onload = function () {
       }
 
       // new  bee instance
-      let bee = new Bee(x, y, size, hive1);
+      let bee = new Bee(x, y, size, i >= garden.numBees / 2 ? hive2 : hive1);
       // Add the bee to the array of bees
       garden.bees.push(bee);
     }
