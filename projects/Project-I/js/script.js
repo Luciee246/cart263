@@ -27,6 +27,7 @@ function setup() {
     let birds = "";
     let words = "";
     let dinos = "";
+    let hockey = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -53,6 +54,13 @@ function setup() {
         .then(response => response.text())
         .then((data) => {
             dinos = data;
+        })
+        .catch(error => console.error('Error fetching data:', error));
+
+    fetch('../dictionaries/hockey.txt')
+        .then(response => response.text())
+        .then((data) => {
+            hockey = data;
         })
         .catch(error => console.error('Error fetching data:', error));
 
@@ -110,6 +118,9 @@ function setup() {
         }
         else if (this.value == "dinosaurs") {
             dictionary = dinos;
+        }
+        else if (this.value == "hockey") {
+            dictionary = hockey;
         }
 
         newPrompt();
