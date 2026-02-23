@@ -28,64 +28,102 @@ function setup() {
     let words = "";
     let dinos = "";
     let hockey = "";
+    let hyphens = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
+    let usedWords = [];
+    let coins = 0;
+    let timerTime = 60;
 
+    Promise.all([
+        fetch('./dictionaries/words.txt').then(x => x.text()),
+        fetch('./dictionaries/birds.txt').then(x => x.text()),
+        fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
+        fetch('./dictionaries/hyphens.txt').then(x => x.text()),
+        fetch('./dictionaries/hockey.txt').then(x => x.text())
+    ]).then(([data1, data2, data3, data4, data5]) => {
+        words = data1;
+        birds = data2;
+        dinos = data3;
+        hyphens = data4;
+        hockey = data5;
 
-    fetch('../dictionaries/words.txt')
-        .then(response => response.text())
-        .then((data) => {
-            words = data;
-            // set dictionary to be words as default
-            dictionary = words;
-            prompt = newPrompt();
-        })
+        // set the default dictionary to be all words
+        dictionary = words + birds + dinos + hyphens + hockey;
+        prompt = newPrompt();
+    })
         .catch(error => console.error('Error fetching data:', error));
-
-
-    fetch('../dictionaries/birds.txt')
-        .then(response => response.text())
-        .then((data) => {
-            birds = data;
-        })
-        .catch(error => console.error('Error fetching data:', error));
-
-    fetch('../dictionaries/dinosaurs.txt')
-        .then(response => response.text())
-        .then((data) => {
-            dinos = data;
-        })
-        .catch(error => console.error('Error fetching data:', error));
-
-    fetch('../dictionaries/hockey.txt')
-        .then(response => response.text())
-        .then((data) => {
-            hockey = data;
-        })
-        .catch(error => console.error('Error fetching data:', error));
-
-
 
 
     let textInput = document.querySelector('#textInput');
+    let displayText = document.querySelector(".displayText");
     textInput.addEventListener("keydown", function (e) {
         if (e.which === 13) {
+            e.preventDefault();
             const dict = dictionary.toLowerCase();
-            const answer = textInput.value.toLowerCase();
+            const answer = textInput.value.toLowerCase().replace(/\;|\:|\s|\=/g, "");
             const result = dict.includes("\n" + answer + "\r");
             const checkInclude = answer.includes(prompt);
+            const checkDuplicates = usedWords.includes(answer);
 
-            if (result == true && checkInclude == true && answer.length > 2) {
-                console.log("correct");
+            if (result == true && checkInclude == true && answer.length > 2 && checkDuplicates == false) {
+                usedWords.push(answer);
                 textInput.value = "";
+                displayText.innerHTML = "";
                 prompt = newPrompt();
+
+                coins++;
+
+                if (answer.length > 14) {
+                    coins += 5;
+                }
+
+                if (answer.includes("-")) {
+                    coins += 5;
+                }
+
+                document.querySelector(".coins").textContent = "coins: " + coins;
+
+                let coinExists = true;
+                let coinVX = Math.floor(Math.random() * 5) + 1;
+                let coinVY = Math.floor(Math.random() * 10) + 5;
+                let coinX = 0;
+                let coinY = 0;
+                let newCoin = document.createElement("div");
+                newCoin.classList.add("coin");
+                newCoin.innerHTML = "<img src='./images/coin.png'>";
+                document.querySelector(".gameplay").appendChild(newCoin);
+                setTimeout(function () {
+                    newCoin.style.transform = "rotateX(" + Math.floor(Math.random() * 100) + 1 + "deg) rotateY(" + Math.floor(Math.random() * 400) + 1 + "deg) rotateZ(" + Math.floor(Math.random() * 100) + 1 + "deg)";
+
+                    setTimeout(function () {
+                        newCoin.remove();
+                        coinExists = false;
+                    }, 2000)
+
+                    function updateCoin() {
+                        if (!coinExists) return;
+
+                        coinVY += -0.1;
+                        coinY += coinVY;
+                        coinX += coinVX - 2.5;
+                        newCoin.style.bottom = 300 + coinY + "px";
+                        newCoin.style.left = 300 + coinX + "px";
+                        console.log(coinVY);
+
+                        requestAnimationFrame(updateCoin);
+                    }
+                    requestAnimationFrame(updateCoin);
+                }, 5)
             }
 
             else {
-                textInput.style.color = "var(--tertiary)";
+                displayText.style.color = "var(--tertiary)";
+                displayText.style.animation = "shake 0.3s ease-out";
                 setTimeout(function () {
-                    textInput.style.color = "var(--primary)";
+                    displayText.style.color = "var(--primary)";
+                    displayText.style.animation = "none";
                 }, 500)
             }
         }
@@ -105,14 +143,19 @@ function setup() {
         return prompt;
     }
 
-
+    textInput.addEventListener("input", function () {
+        // console.log(this.innerHTML.toLowerCase().replace(prompt, "<span style='color: green;'>" + prompt + "</span>"));
+        let newHTML = this.value;
+        let newHTML2 = newHTML.toLowerCase().replace(prompt, "<span>" + prompt + "</span>");
+        displayText.innerHTML = newHTML2;
+    })
 
     document.querySelector("#dropdown").addEventListener("change", function () {
         console.log(this.value);
 
 
         if (this.value == "normal") {
-            dictionary = words;
+            dictionary = words + birds + dinos + hyphens;
         }
         else if (this.value == "birds") {
             dictionary = birds;
@@ -123,8 +166,6 @@ function setup() {
         else if (this.value == "hockey") {
             dictionary = hockey;
         }
-
-        newPrompt();
     })
 
     document.querySelector(".slider").addEventListener("change", function () {
@@ -133,19 +174,58 @@ function setup() {
         difficulty = this.value;
     })
 
-    // Buttons
 
-    let timer = 60;
+    let timer = timerTime;
+    let gameOn = false;
 
     document.querySelector(".play-button").addEventListener("click", function () {
-        this.style.display = "none";
-        document.querySelector(".gameplay").style.display = "flex";
-        timer = 60;
-        setInterval(function () {
-            if (timer > 0) {
+        gameStart();
+        timer = timerTime;
+
+        const timerInterval = setInterval(myTimer, 1000);
+        function myTimer() {
+            if (timer > 0 && gameOn == true) {
                 timer--;
-                document.querySelector(".timer").textContent = timer;
             }
-        }, 1000)
+
+            if (timer == 0) {
+                myStopFunction();
+                gameEnd();
+                timer = timerTime;
+            }
+
+            document.querySelector(".timer").textContent = timer;
+        }
+
+        function myStopFunction() {
+            clearInterval(timerInterval);
+        }
+    })
+
+    function gameStart() {
+        document.querySelector(".start").style.display = "none";
+        document.querySelector(".gameplay").style.display = "flex";
+        document.querySelector(".slider").style.display = "none";
+        document.querySelector("#dropdown").style.display = "none";
+        document.querySelector(".dictionaries p").textContent = "dictionary: " + document.querySelector("#dropdown").value;
+        textInput.focus();
+        textInput.value = "";
+        displayText.innerHTML = "";
+        usedWords = [];
+        newPrompt();
+        gameOn = true;
+    }
+
+    function gameEnd() {
+        document.querySelector(".start").style.display = "flex";
+        document.querySelector(".gameplay").style.display = "none";
+        document.querySelector(".slider").style.display = "block";
+        document.querySelector("#dropdown").style.display = "block";
+        document.querySelector(".dictionaries p").textContent = "dictionary: ";
+        gameOn = false;
+    }
+
+    document.querySelector(".gameplay").addEventListener("click", function () {
+        textInput.focus();
     })
 }
