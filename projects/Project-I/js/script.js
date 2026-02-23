@@ -32,6 +32,7 @@ function setup() {
     let dictionary = "";
     let difficulty = 1;
 
+
     fetch('../dictionaries/words.txt')
         .then(response => response.text())
         .then((data) => {
