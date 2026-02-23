@@ -27,14 +27,17 @@ function setup() {
     let birds = "";
     let words = "";
     let dinos = "";
-    let hockey = "";
     let hyphens = "";
+    let hockey = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
     let usedWords = [];
     let coins = 0;
+    let coinSpin = 0;
     let timerTime = 60;
+    let winStreak = 0;
+    // DO SOMETHING WITH THE WINSTREAK SO IT GOES FIRE AFTER 5 CONSECUTIVE CORRECT ANSWERS OR SOMETHING
 
     Promise.all([
         fetch('./dictionaries/words.txt').then(x => x.text()),
@@ -50,7 +53,7 @@ function setup() {
         hockey = data5;
 
         // set the default dictionary to be all words
-        dictionary = words + birds + dinos + hyphens + hockey;
+        dictionary = words + birds + dinos + hyphens;
         prompt = newPrompt();
     })
         .catch(error => console.error('Error fetching data:', error));
@@ -62,7 +65,7 @@ function setup() {
         if (e.which === 13) {
             e.preventDefault();
             const dict = dictionary.toLowerCase();
-            const answer = textInput.value.toLowerCase().replace(/\;|\:|\s|\=/g, "");
+            const answer = textInput.value.toLowerCase().replace(/\;|\:|\=|\./g, "");
             const result = dict.includes("\n" + answer + "\r");
             const checkInclude = answer.includes(prompt);
             const checkDuplicates = usedWords.includes(answer);
@@ -70,55 +73,68 @@ function setup() {
             if (result == true && checkInclude == true && answer.length > 2 && checkDuplicates == false) {
                 usedWords.push(answer);
                 textInput.value = "";
-                displayText.innerHTML = "";
                 prompt = newPrompt();
 
-                coins++;
+                let coinCount = 1;
+                winStreak++;
 
                 if (answer.length > 14) {
-                    coins += 5;
+                    coinCount += 3;
                 }
 
                 if (answer.includes("-")) {
-                    coins += 5;
+                    coinCount += 3;
                 }
 
-                document.querySelector(".coins").textContent = "coins: " + coins;
+                coins += coinCount;
 
-                let coinExists = true;
-                let coinVX = Math.floor(Math.random() * 5) + 1;
-                let coinVY = Math.floor(Math.random() * 10) + 5;
-                let coinX = 0;
-                let coinY = 0;
-                let newCoin = document.createElement("div");
-                newCoin.classList.add("coin");
-                newCoin.innerHTML = "<img src='./images/coin.png'>";
-                document.querySelector(".gameplay").appendChild(newCoin);
-                setTimeout(function () {
-                    newCoin.style.transform = "rotateX(" + Math.floor(Math.random() * 100) + 1 + "deg) rotateY(" + Math.floor(Math.random() * 400) + 1 + "deg) rotateZ(" + Math.floor(Math.random() * 100) + 1 + "deg)";
+                document.querySelector(".coins p").textContent = "coins: " + coins;
 
+                coinSpin += 360;
+                document.querySelector(".coin-icon").style.transform = "rotateY(" + coinSpin + "deg)";
+
+                const span = document.querySelector('.displayText span');
+                const rect = span.getBoundingClientRect();
+
+                displayText.innerHTML = "";
+
+                for (let i = 0; i < coinCount; i++) {
+                    let coinExists = true;
+                    let coinVX = Math.floor(Math.random() * 5) + 1;
+                    let coinVY = Math.floor(Math.random() * 8) + 4;
+                    let coinX = 0;
+                    let coinY = -120;
+                    let newCoin = document.createElement("div");
+                    newCoin.classList.add("coin");
+                    newCoin.innerHTML = "<img src='./images/coin.png'>";
+                    document.querySelector(".gameplay").appendChild(newCoin);
                     setTimeout(function () {
-                        newCoin.remove();
-                        coinExists = false;
-                    }, 2000)
+                        newCoin.style.transform = "rotateX(" + Math.floor(Math.random() * 100) + 1 + "deg) rotateY(" + Math.floor(Math.random() * 400) + 1 + "deg) rotateZ(" + Math.floor(Math.random() * 100) + 1 + "deg)";
 
-                    function updateCoin() {
-                        if (!coinExists) return;
+                        setTimeout(function () {
+                            newCoin.remove();
+                            coinExists = false;
+                        }, 2000)
 
-                        coinVY += -0.1;
-                        coinY += coinVY;
-                        coinX += coinVX - 2.5;
-                        newCoin.style.bottom = 300 + coinY + "px";
-                        newCoin.style.left = 300 + coinX + "px";
-                        console.log(coinVY);
+                        function updateCoin() {
+                            if (!coinExists) return;
 
+                            coinVY += -0.4;
+                            coinY += coinVY;
+                            coinX += coinVX - 2.5;
+                            newCoin.style.bottom = rect.bottom + coinY + "px";
+                            newCoin.style.left = rect.left + coinX + "px";
+
+                            requestAnimationFrame(updateCoin);
+                        }
                         requestAnimationFrame(updateCoin);
-                    }
-                    requestAnimationFrame(updateCoin);
-                }, 5)
+                    }, 5)
+                }
+
             }
 
             else {
+                winStreak = 0;
                 displayText.style.color = "var(--tertiary)";
                 displayText.style.animation = "shake 0.3s ease-out";
                 setTimeout(function () {
@@ -144,7 +160,6 @@ function setup() {
     }
 
     textInput.addEventListener("input", function () {
-        // console.log(this.innerHTML.toLowerCase().replace(prompt, "<span style='color: green;'>" + prompt + "</span>"));
         let newHTML = this.value;
         let newHTML2 = newHTML.toLowerCase().replace(prompt, "<span>" + prompt + "</span>");
         displayText.innerHTML = newHTML2;
