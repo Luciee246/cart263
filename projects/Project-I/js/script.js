@@ -40,18 +40,17 @@ function setup() {
     // DO SOMETHING WITH THE WINSTREAK SO IT GOES FIRE AFTER 5 CONSECUTIVE CORRECT ANSWERS OR SOMETHING
 
     Promise.all([
-        fetch('./dictionaries/words.txt').then(x => x.text()),
-        fetch('./dictionaries/birds.txt').then(x => x.text()),
-        fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
-        fetch('./dictionaries/hyphens.txt').then(x => x.text()),
-        fetch('./dictionaries/hockey.txt').then(x => x.text())
+        fetch('dictionaries/words.txt').then(x => x.text()),
+        fetch('dictionaries/birds.txt').then(x => x.text()),
+        fetch('dictionaries/dinosaurs.txt').then(x => x.text()),
+        fetch('dictionaries/hyphens.txt').then(x => x.text()),
+        fetch('dictionaries/hockey.txt').then(x => x.text())
     ]).then(([data1, data2, data3, data4, data5]) => {
         words = data1;
         birds = data2;
         dinos = data3;
         hyphens = data4;
         hockey = data5;
-        console.log("Dictionary content:", data);
 
         // set the default dictionary to be all words
         dictionary = words + birds + dinos + hyphens;
