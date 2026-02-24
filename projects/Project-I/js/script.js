@@ -51,6 +51,7 @@ function setup() {
         dinos = data3;
         hyphens = data4;
         hockey = data5;
+        console.log("Dictionary content:", data);
 
         // set the default dictionary to be all words
         dictionary = words + birds + dinos + hyphens;
