@@ -56,12 +56,13 @@ class Bee {
             this.isAtHome = false;
             this.vx = Math.floor(Math.random() * 8) + 3;
             this.vy = Math.floor(Math.random() * 8) + 3;
-        }
-
-        else {
+        } else {
             this.isAtHome = true;
             this.vx = 0;
             this.vy = 0;
         }
+
+        // Only update the display
+        this.beehive.updateCounter();
     }
 }

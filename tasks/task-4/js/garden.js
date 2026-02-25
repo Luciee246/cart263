@@ -56,16 +56,12 @@ window.onload = function () {
     garden.grass.grassDiv.style.background = `rgb(${garden.grass.grassColor.r},${garden.grass.grassColor.g},${garden.grass.grassColor.b})`;
     document.getElementsByTagName("main")[0].appendChild(garden.grass.grassDiv);
 
-
-    let hive1 = new BeeHive(200, 350, 100, { r: 230, g: 180, b: 60 });
-    let hive2 = new BeeHive(600, 360, 120, { r: 240, g: 190, b: 70 });
-
-    garden.beeHives.push(hive1);
-    garden.beeHives.push(hive2);
-
+    // add beehives
+    let hive1 = new BeeHive(200, 350, 100, { r: 230, g: 180, b: 60 }, 0);
+    let hive2 = new BeeHive(600, 360, 120, { r: 240, g: 190, b: 70 }, 1);
+    garden.beeHives.push(hive1, hive2);
     hive1.renderBeeHive();
     hive2.renderBeeHive();
-
 
     //create some flowers
     for (let i = 0; i < garden.numFlowers; i++) {
@@ -91,26 +87,15 @@ window.onload = function () {
       garden.flowers[i].renderFlower();
     }
 
-    //create some bees
+
+    // create bees
     for (let i = 0; i < garden.numBees; i++) {
-      // Create variables for our arguments for clarity
-      let size = Math.random() * 30 + 10;
-      let x;
-      let y;
+      let targetHive = i >= garden.numBees / 2 ? hive2 : hive1;
+      let bee = new Bee(targetHive.x, targetHive.y, Math.random() * 30 + 10, targetHive);
 
-      if (i >= garden.numBees / 2) {
-        x = hive2.x;
-        y = hive2.y;
-      }
-      else {
-        x = hive1.x;
-        y = hive1.y;
-      }
-
-      // new  bee instance
-      let bee = new Bee(x, y, size, i >= garden.numBees / 2 ? hive2 : hive1);
-      // Add the bee to the array of bees
+      targetHive.addBee(bee); // Tell the hive about this bee
       garden.bees.push(bee);
+      bee.renderBee();
     }
 
     for (let i = 0; i < garden.numBees; i++) {
