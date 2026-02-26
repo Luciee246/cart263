@@ -18,9 +18,22 @@ window.onload = function () {
     let radius = 40;
     let startAngle = 0;
     let endAngle = Math.PI * 2; //full rotation
+
+    //FIRST
     context.strokeStyle = "#FF0000"; // change the color we are using
+    context.beginPath();
     context.arc(xPos, yPos, radius, startAngle, endAngle, true);
     context.fill(); // set the fill
     context.lineWidth = 2; //change stroke
-    context.stroke(); //set the stroke
+    context.stroke();//set the stroke
+    context.closePath();
+
+    //SECOND
+    context.strokeStyle = "#0000FF"; // change the color we are using
+    context.beginPath();
+    context.arc(xPos + 200, yPos, radius, startAngle, endAngle, true);
+    context.fill(); // set the fill
+    context.lineWidth = 2; //change stroke
+    context.stroke();//set the stroke
+    context.closePath();
 };
