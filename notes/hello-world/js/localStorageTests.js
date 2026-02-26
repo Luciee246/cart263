@@ -6,7 +6,7 @@ window.onload = function () {
     }
 
     // the callback function
-    function saveStateHandler(event) {
+    function saveStateHandler(this) {
         console.log(this.parentElement); // get parent element
         let buttonID = this.parentElement.id;
         let inputValue = this.parentElement.querySelector("input").value;
