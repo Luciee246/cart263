@@ -5,6 +5,7 @@ html {
     --tertiary: #D72D51;
     --font1: "Bitcount Single", system-ui;
     --font2: "Inter Tight", sans-serif;
+    --radius: 10px;
 }
 
 * {
@@ -68,6 +69,7 @@ header {
     align-items: center;
     gap: 30px;
     animation: floating 3s infinite ease-in-out;
+    padding-top: 150px;
 }
 
 @keyframes floating {
@@ -132,8 +134,8 @@ header {
 }
 
 .displayText span {
-    color: rgb(153, 205, 50);
-    text-shadow: lime 0px 0px 20px;
+    color: rgb(244, 210, 20);
+    text-shadow: rgb(255, 225, 0) 0px 0px 20px;
 }
 
 @keyframes shake {
@@ -193,6 +195,23 @@ header {
     font-size: 2rem;
     font-family: var(--font1);
     font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.prompt-container {
+    position: relative;
+}
+
+.fire {
+    position: absolute;
+    display: none;
+    width: 56px;
+    top: -30px;
+    right: -30px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0px 0px 30px rgb(255, 204, 0)) drop-shadow(0px 0px 15px rgb(255, 136, 0));
+    z-index: 2;
 }
 
 .dictionaries {
@@ -202,10 +221,9 @@ header {
 }
 
 select {
+    appearance: none;
     outline: none;
     border: none;
-    background: none;
-    /* border-radius: 10px; */
     padding: 10px;
     text-align: center;
     background: none;
@@ -215,6 +233,8 @@ select {
     font-family: var(--font1);
     background-color: var(--primary);
     color: var(--secondary);
+    border-radius: var(--radius);
+    cursor: pointer;
 }
 
 option {
@@ -241,6 +261,7 @@ option {
     opacity: 1;
     -webkit-transition: .2s;
     transition: opacity .2s;
+    border-radius: var(--radius);
 }
 
 .slider:hover {
@@ -254,6 +275,7 @@ option {
     height: 25px;
     background: var(--tertiary);
     cursor: pointer;
+    border-radius: var(--radius);
 }
 
 .slider::-moz-range-thumb {
@@ -261,11 +283,11 @@ option {
     height: 25px;
     background: var(--tertiary);
     cursor: pointer;
+    border-radius: var(--radius);
 }
 
 .play-button {
     border: none;
-    /* border-radius: 20px; */
     padding: 20px;
     background-color: var(--tertiary);
     color: var(--secondary);
@@ -274,11 +296,12 @@ option {
     font-size: 2em;
     cursor: pointer;
     transition: all 0.3s;
+    border-radius: var(--radius);
 }
 
 .play-button:hover {
-    transform: scale(1.1);
-    filter: contrast(0.7);
+    transform: scale(1.05);
+    filter: drop-shadow(0px 0px 20px var(--tertiary))
 }
 
 .coins {
@@ -305,7 +328,6 @@ option {
 .coin img {
     width: 100%;
     position: absolute;
-    /* filter: hue-rotate(30deg); */
     filter: drop-shadow(0px 0px 30px rgba(255, 215, 0, 1));
 }
 
@@ -325,4 +347,13 @@ option {
     100% {
         opacity: 0;
     }
+}
+
+.stats {
+    margin-top: 50px;
+    padding: 10%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
