@@ -380,7 +380,7 @@ function setup() {
     // for (let i = 0; i < theButtons.length; i++) {
     //     theButtons[i].addEventListener("click", saveStateHandler);
     // }
-
+    // localStorage.clear();
     // the callback function
     function saveStateHandler() {
 
@@ -394,7 +394,17 @@ function setup() {
             // Reset input value
             coins = 0;
         }
+
+
+        localStorage.setItem("difficulty", difficulty);
+        difficulty = 1;
+
+
+        if (dictionary !== "") {
+            localStorage.setItem("dictionary", document.querySelector("#dropdown").value);
+        }
     }
+    saveStateHandler();
 
 
     // callBack function
@@ -405,7 +415,46 @@ function setup() {
         // }
         coins = Number(localStorage.getItem("coins"));
         document.querySelector(".coins p").textContent = "coins: " + coins;
+
+        difficulty = Number(localStorage.getItem("difficulty"));
+        document.querySelector(".difficulty p").textContent = "difficulty: " + difficulty;
+        document.querySelector(".slider").value = difficulty;
+
+        let mode = localStorage.getItem("dictionary");
+        document.querySelector("#dropdown").value = mode;
+
     }
 
     retrieveHandler();
+
+    let settingsOpen = false;
+    document.querySelector(".settings-button").addEventListener("click", function () {
+        sound1.play();
+        const settings = document.querySelector(".settings");
+        if (!settingsOpen) {
+            settings.style.display = "flex";
+            setTimeout(function () {
+                settings.style.transform = "translateY(0)";
+                document.querySelector(".slider").style.backgroundColor = "var(--secondary)";
+                document.querySelector("select").style.backgroundColor = "var(--secondary)";
+                document.querySelector("select").style.color = "var(--primary)";
+                document.querySelector(".coins").style.color = "var(--secondary)";
+                document.querySelector(".timer").style.color = "var(--secondary)";
+                document.querySelector(".dictionaries").style.color = "var(--secondary)";
+                document.querySelector(".difficulty").style.color = "var(--secondary)";
+                settingsOpen = true;
+            }, 5)
+        }
+        else {
+            settings.style.transform = "translateY(-100vh)";
+            document.querySelector(".slider").style.backgroundColor = "var(--primary)";
+            document.querySelector("select").style.backgroundColor = "var(--primary)";
+            document.querySelector("select").style.color = "var(--secondary)";
+            document.querySelector(".coins").style.color = "var(--primary)";
+            document.querySelector(".timer").style.color = "var(--primary)";
+            document.querySelector(".dictionaries").style.color = "var(--primary)";
+            document.querySelector(".difficulty").style.color = "var(--primary)";
+            settingsOpen = false;
+        }
+    })
 }

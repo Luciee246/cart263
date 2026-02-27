@@ -4,6 +4,7 @@ bird-of-paradise
 blue-jay
 brush-turkey
 buzzard-eagle
+bee-eater
 cage-bird
 canary-flycatcher
 chuck-will’s-widow
@@ -50,6 +51,7 @@ shrike-tyrant
 shrike-vireo
 sparrow-lark
 sparrow-weaver
+swallow-shrike
 spot-throat
 stone-curlew
 sunbird-asity
@@ -75,6 +77,7 @@ white-eye
 wren
 wren-babbler
 wren-warbler
+wren-spinetail
 robin-chat
 chat-tyrant
 cordon-bleu
@@ -85,6 +88,7 @@ ant-tanagers
 birds-of-paradise
 blue-jays
 brush-turkeys
+bee-eaters
 buzzard-eagles
 cage-birds
 canary-flycatchers
@@ -132,6 +136,7 @@ shrike-tyrants
 shrike-vireos
 sparrow-larks
 sparrow-weavers
+swallow-shrikes
 spot-throats
 stone-curlews
 sunbird-asities
@@ -157,6 +162,7 @@ white-eyes
 wrens
 wren-babblers
 wren-warblers
+wren-spinetails
 robin-chats
 chat-tyrants
 cordon-bleus
@@ -279,6 +285,7 @@ pigeon
 crow
 raven
 chickadee
+parakeet
 dove
 cardinal
 nightingale
@@ -334,13 +341,15 @@ warbler
 yellowhammer
 cockatoo
 cuckoo
-canaries
+canary
+chicken
 seagulls
 ducks
 pigeons
 crows
 ravens
 chickadees
+parakeets
 doves
 cardinals
 nightingales
@@ -396,3 +405,4 @@ yellowhammers
 cockatoos
 cuckoos
 canaries
+chickens
