@@ -13,9 +13,10 @@
  * Rule Book:
  * - Words must be at least 3 letters long
  * - Words must include the bigram prompt
- * - 2 seconds will be added to the timer for every correct answer
- * - Gain 5 points for every letter used
- * - Gain 10 points for every hyphen placed
+ * - Gain 1 coin for every correct answer
+ * - Gain 3 extra coins for words longer than 14 characters
+ * - Gain 3 extra coins for hyphenated words
+ * - Gain 3 extra coins for maintaining a win streak of 5 or more
  * 
  */
 
