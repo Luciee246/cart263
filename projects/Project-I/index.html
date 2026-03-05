@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
     <script src="./js/bigrams.js"></script>
     <script src="./js/script.js"></script>
 </head>
+
 <body>
     <header>
         <div class="settings-button"><img src="./images/settings.png"></div>
@@ -29,14 +31,43 @@
                 <option value="hockey players">Hockey players</option>
             </select>
         </div>
-        <div class="coins"><p>coins: 0</p><img src="./images/coin.png" class="coin-icon"></div>
+        <div class="coins">
+            <p>coins: 0</p><img src="./images/coin.png" class="coin-icon">
+        </div>
         <h2 class="timer">60</h2>
     </header>
     <div class="settings">
-        <div class="volume">
-            <p>Volume: </p>
-            <input type="range" min="1" max="10" value="1" class="volume-slider">
-            <p></p>
+        <div class="settings-list">
+            <div class="volume">
+                <p>Volume: </p>
+                <input type="range" min="1" max="10" value="10" class="volume-slider">
+            </div>
+            <button class="colors">Random color scheme</button>
+        </div>
+
+        <div class="rules">
+            <p> Game by <b>Lucie Soussana</b>, <b>Jake Hayduk</b>.</p>
+            <p>A game of making words with the given bigrams.</p>
+            <p>
+                <b>Instructions:</b>
+            <ul>
+                <li>Choose a theme and difficulty level</li>
+                <li>Bigrams will appear on the screen</li>
+                <li>Make words using the bigrams</li>
+                <li>Get a high score before time runs out!</li>
+            </ul>
+            </p>
+            <p>
+                <b>Rule Book:</b>
+            <ul>
+                <li>Words must be at least 3 letters long</li>
+                <li>Words must include the bigram prompt</li>
+                <li>Gain 1 coin for every correct answer</li>
+                <li>Gain 3 extra coins for words long than 15 characters or longer</li>
+                <li>Gain 3 extra coins for hyphenated words</li>
+                <li>Gain 3 extra coins for maintaining a win streak of 5 or more</li>
+            </ul>
+            </p>
         </div>
     </div>
     <div class="start">
@@ -44,7 +75,7 @@
         <button class="play-button">Play</button>
         <div class="stats">Type words that contain the prompt</div>
     </div>
-    
+
     <div class="gameplay">
         <div class="prompt-container">
             <h3 class="prompt">CU</h3>
@@ -54,4 +85,5 @@
         <div class="displayText"></div>
     </div>
 </body>
+
 </html>

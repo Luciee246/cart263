@@ -13,10 +13,9 @@
  * Rule Book:
  * - Words must be at least 3 letters long
  * - Words must include the bigram prompt
- * - Gain 1 coin for every correct answer
- * - Gain 3 extra coins for words longer than 14 characters
- * - Gain 3 extra coins for hyphenated words
- * - Gain 3 extra coins for maintaining a win streak of 5 or more
+ * - 2 seconds will be added to the timer for every correct answer
+ * - Gain 5 points for every letter used
+ * - Gain 10 points for every hyphen placed
  * 
  */
 
@@ -46,6 +45,7 @@ function setup() {
     let answerPrompts = [];
     let answerStreaks = []
 
+    // load sounds
     let sound1 = new Audio('./sounds/sound-1.mp3');
     let sound2 = new Audio('./sounds/sound-2.mp3');
     let soundFire = new Audio('./sounds/fire.mp3');
@@ -53,6 +53,7 @@ function setup() {
     let soundCoin2 = new Audio('./sounds/coin2.mp3');
     let soundCoin3 = new Audio('./sounds/coin3.mp3');
     let soundIncorrect = new Audio('./sounds/incorrect.mp3');
+    let volume = 1;
 
     // fetch the dictionary text files
     Promise.all([
@@ -74,6 +75,9 @@ function setup() {
 
         // set the prompt function
         prompt = newPrompt();
+
+        // retrieve locally stored data once the dictionaries are loaded
+        retrieveHandler();
     })
         .catch(error => console.error('Error fetching data:', error));
 
@@ -90,11 +94,13 @@ function setup() {
             const answer = textInput.value.toLowerCase().replace(/\;|\:|\=|\.|\,|0|1|2|3|4|5|5|6|7|8|9|\"|\\|\]|\{|\[|\{|\//g, "");
             // check for includes consistent with all of our dictionary formatting
             const result = dict.includes("\n" + answer + "\r");
+            // simmilar check but for systems using LF line break formatting (GitHub) instead of CLRF like the above
+            const result2 = dict.includes("\n" + answer + "\n");
             const checkInclude = answer.includes(prompt);
             const checkDuplicates = usedWords.includes(answer);
 
             // if the dictionary includes the typed answer, the typed answer includes the given prompt, is longer than 2 characters, and hasn't been typed already yet, the output is correct
-            if (result == true && checkInclude == true && answer.length > 2 && checkDuplicates == false) {
+            if (result == true || result2 == true && checkInclude == true && answer.length > 2 && checkDuplicates == false) {
                 usedWords.push(answer);
                 textInput.value = "";
 
@@ -131,7 +137,7 @@ function setup() {
                 coins += coinCount;
                 coinsChange += coinCount;
 
-                document.querySelector(".coins p").textContent = "coins: " + coins;
+                document.querySelector(".coins p").innerHTML = "<span>coins: </span>" + coins;
 
                 // coin icon spins 360 deg every correct answer
                 coinSpin += 360;
@@ -146,7 +152,6 @@ function setup() {
                 else {
                     rect = document.querySelector(".prompt").getBoundingClientRect();
                 }
-
 
                 displayText.innerHTML = "";
 
@@ -179,16 +184,22 @@ function setup() {
                         let lastTime = 0;
                         function updateCoin(currentTime) {
                             if (!coinExists) return;
-                            let deltaTime = currentTime - lastTime;
-                            // change the coin's velocity by a negative gravitational accelerant constant
-                            coinVY += -0.00004 * deltaTime;
-                            // update the x and y positions based on the velocities
-                            coinY += coinVY;
-                            coinX += coinVX - 2.5;
-                            // update the element position
-                            newCoin.style.bottom = rect.bottom + coinY + "px";
-                            newCoin.style.left = rect.left + coinX + "px";
 
+                            if (lastTime) {
+                                // use a delta time to ensure consistant animation speed across devices
+                                const deltaTime = (currentTime - lastTime) / 1000;
+
+                                // change the coin's velocity by a negative gravitational accelerant constant
+                                coinVY += -18 * deltaTime;
+                                // update the x and y positions based on the velocities
+                                coinY += coinVY;
+                                coinX += coinVX - 2.5;
+                                // update the element position
+                                newCoin.style.bottom = rect.bottom + coinY + "px";
+                                newCoin.style.left = rect.left + coinX + "px";
+                            }
+
+                            lastTime = currentTime;
 
                             requestAnimationFrame(updateCoin);
                         }
@@ -272,24 +283,28 @@ function setup() {
 
     // when something is selected from the dictionaries dropdown list
     document.querySelector("#dropdown").addEventListener("change", function () {
+        changeDictionary(this.value)
+        sound1.play();
 
+        saveStateHandler();
+    })
+
+    function changeDictionary(value) {
         // change the dictionary depending on the selected value
-        if (this.value == "normal") {
+        if (value == "normal") {
             // the 'normal' dictionary includes all other dictionaries that contain valid words that are not proper noun dictionaries
             dictionary = words + birds + dinos + hyphens;
         }
-        else if (this.value == "birds") {
+        else if (value == "birds") {
             dictionary = birds;
         }
-        else if (this.value == "dinosaurs") {
+        else if (value == "dinosaurs") {
             dictionary = dinos;
         }
-        else if (this.value == "hockey players") {
+        else if (value == "hockey players") {
             dictionary = hockey;
         }
-
-        sound1.play();
-    })
+    }
 
     // update the difficulty based on the slider value
     document.querySelector(".slider").addEventListener("change", function () {
@@ -297,6 +312,8 @@ function setup() {
 
         difficulty = this.value;
         sound1.play();
+
+        saveStateHandler();
     })
 
     // set the timer to be the 
@@ -368,7 +385,6 @@ function setup() {
         document.querySelector(".stats").innerHTML = "<h2>+" + coinsChange + " coins</h2><p>You spent " + (answerTimes[index] / 1000).toFixed(2) + "s on the prompt \"" + answerPrompts[index].toUpperCase() + "\" and answered \"" + usedWords[index].toUpperCase() + "\".</p><p>Your longest streak was " + Math.max(...answerStreaks) + ".</p>";
 
         saveStateHandler();
-        retrieveHandler();
     }
 
     // make sure the text input is focused when clicking anywhere in the parent div
@@ -378,56 +394,62 @@ function setup() {
 
 
 
-    // for (let i = 0; i < theButtons.length; i++) {
-    //     theButtons[i].addEventListener("click", saveStateHandler);
-    // }
+    // uncomment the below line to clear the saved settings and coins for testing purposes
     // localStorage.clear();
-    // the callback function
+
+    // save game settings and coin amount
     function saveStateHandler() {
 
-        // let buttonID = this.parentElement.id;
-        // let inputValue = this.parentElement.querySelector("input").value;
-        // console.log(inputValue);
-
+        // save the values to local storage if they are not default values
         if (coins !== 0) {
-            // Save the value to local storage
             localStorage.setItem("coins", coins);
-            // Reset input value
-            coins = 0;
         }
 
+        if (difficulty !== 1) {
+            localStorage.setItem("difficulty", difficulty);
+        }
 
-        localStorage.setItem("difficulty", difficulty);
-        difficulty = 1;
-
-
-        if (dictionary !== "") {
+        if (document.querySelector("#dropdown").value) {
             localStorage.setItem("dictionary", document.querySelector("#dropdown").value);
         }
+
+        if (volume !== 10) {
+            localStorage.setItem("volume", volume);
+        }
     }
-    saveStateHandler();
 
-
-    // callBack function
+    // retrieve game settings and coin amount
     function retrieveHandler() {
-        // for (let [key, value] of Object.entries(localStorage)) {
-        //     let textBox = document.querySelector(div[data-ref=${key}]);
-        //     textBox.innerHTML = value;
-        // }
-        coins = Number(localStorage.getItem("coins"));
-        document.querySelector(".coins p").textContent = "coins: " + coins;
 
-        difficulty = Number(localStorage.getItem("difficulty"));
-        document.querySelector(".difficulty p").textContent = "difficulty: " + difficulty;
-        document.querySelector(".slider").value = difficulty;
+        // once again check to see if the settings are not default or null and update the displayed settings to match the local saves
+        let localCoins = Number(localStorage.getItem("coins"));
+        if (localCoins !== 0) {
+            coins = localCoins;
+            document.querySelector(".coins p").innerHTML = "<span>coins: </span>" + coins;
+        }
 
-        let mode = localStorage.getItem("dictionary");
-        document.querySelector("#dropdown").value = mode;
+        let localDifficulty = Number(localStorage.getItem("difficulty"));
+        if (localDifficulty !== 0) {
+            difficulty = localDifficulty;
+            document.querySelector(".difficulty p").textContent = "difficulty: " + difficulty;
+            document.querySelector(".slider").value = difficulty;
+        }
 
+        let localDictionary = localStorage.getItem("dictionary");
+        if (localDictionary) {
+            changeDictionary(localDictionary);
+            document.querySelector("#dropdown").value = localDictionary;
+        }
+
+        let localVolume = Number(localStorage.getItem("volume"));
+        if (localVolume) {
+            changeVolume(localVolume * 10)
+            document.querySelector(".volume-slider").value = localVolume * 10;
+        }
     }
 
-    retrieveHandler();
 
+    // settings menu open and close animations
     let settingsOpen = false;
     document.querySelector(".settings-button").addEventListener("click", function () {
         sound1.play();
@@ -457,5 +479,36 @@ function setup() {
             document.querySelector(".difficulty").style.color = "var(--primary)";
             settingsOpen = false;
         }
+    })
+
+    // change the game volume based on the volume slider value
+    document.querySelector(".volume-slider").addEventListener("change", function () {
+        changeVolume(this.value);
+        sound1.play();
+        saveStateHandler();
+    })
+
+    function changeVolume(value) {
+        volume = value / 10;
+
+        sound1.volume = volume;
+        sound2.volume = volume;
+        soundFire.volume = volume;
+        soundCoin1.volume = volume;
+        soundCoin2.volume = volume;
+        soundCoin3.volume = volume;
+        soundIncorrect.volume = volume;
+
+    }
+
+    // randomize game colours easter egg
+    document.querySelector(".colors").addEventListener("click", function () {
+        const color1 = "hsl(" + Math.floor(Math.random() * 360) + 1 + ", 100%, 87%)";
+        const color2 = "hsl(" + Math.floor(Math.random() * 360) + 1 + ", 74%, 12%)";
+        const color3 = "hsl(" + Math.floor(Math.random() * 360) + 1 + ", 68%, 51%)";
+
+        document.documentElement.style.setProperty("--primary", color1);
+        document.documentElement.style.setProperty("--secondary", color2);
+        document.documentElement.style.setProperty("--tertiary", color3);
     })
 }
