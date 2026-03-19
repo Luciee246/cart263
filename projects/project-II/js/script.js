@@ -30,6 +30,7 @@ function setup() {
     let dinos = "";
     let hyphens = "";
     let hockey = "";
+    let anatomy = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -61,17 +62,19 @@ function setup() {
         fetch('./dictionaries/birds.txt').then(x => x.text()),
         fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
         fetch('./dictionaries/hyphens.txt').then(x => x.text()),
-        fetch('./dictionaries/hockey.txt').then(x => x.text())
-    ]).then(([data1, data2, data3, data4, data5]) => {
+        fetch('./dictionaries/hockey.txt').then(x => x.text()),
+        fetch('./dictionaries/anatomy.txt').then(x => x.text())
+    ]).then(([data1, data2, data3, data4, data5, data6]) => {
         // place them in their respective variables once loaded
         words = data1;
         birds = data2;
         dinos = data3;
         hyphens = data4;
         hockey = data5;
+        anatomy = data6;
 
         // set the default dictionary to be all words
-        dictionary = words + birds + dinos + hyphens;
+        dictionary = words + birds + dinos + hyphens + hockey + anatomy;
 
         // set the prompt function
         prompt = newPrompt();
@@ -293,7 +296,7 @@ function setup() {
         // change the dictionary depending on the selected value
         if (value == "normal") {
             // the 'normal' dictionary includes all other dictionaries that contain valid words that are not proper noun dictionaries
-            dictionary = words + birds + dinos + hyphens;
+            dictionary = words + birds + dinos + hyphens + hockey + anatomy;
         }
         else if (value == "birds") {
             dictionary = birds;
@@ -303,6 +306,9 @@ function setup() {
         }
         else if (value == "hockey players") {
             dictionary = hockey;
+        }
+        else if (value == "anatomy") {
+            dictionary = anatomy;
         }
     }
 
