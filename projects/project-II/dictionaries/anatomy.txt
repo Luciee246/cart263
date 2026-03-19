@@ -128,3 +128,58 @@ Biceos femoris
 Semitendinosus
 Adductor magnus
 Semimembranosus
+
+Teres minor tendons
+Infraspinatus tendons
+Supraspinatus tendons
+Subscapularis tendons
+Deltoid tendons
+Biceps tendons		
+Triceps tendons		
+Brachioradialis tendons		
+Supinator tendons		
+Flexor carpi radialis tendons		
+Flexor carpi ulnaris tendons		
+Extensor carpi radialis tendons		
+Extensor carpi radialis brevis tendons		
+Iliopsoas tendons
+Obturator internus tendons		
+Adductor longus, brevis magnus tendons		
+Gluteus maximus		
+Gluteus medius tendons		
+Quadriceps tendons(patellar tendon/ patella)		
+Hamstring tendons		
+Sartorius tendons		
+Gastrocnemius tendons		
+Achilles tendon		
+Soleus tendons		
+Tibialis anterior tendons		
+Peroneus longus tendons		
+Flexor digitorum longus tendons		
+Interosseus tendons		
+Flexor digitorum profundus tendons		
+Abductor digiti minimi tendons		
+Opponens pollicis tendons		
+Flexor pollicis longus tendons		
+Extensor pollicis tendons		
+abductor pollicis tendons		
+Flexor hallucis longus tendons		
+Flexor digitorum brevis tendons		
+Lumbrical tendons		
+Abductor hallucis tendons		
+Flexor digitorum longus tendons		
+Abductor digiti minimi tendons		
+Ocular tendons
+Levator palpebrae tendons
+Masseter tendons
+Temporalis tendons
+Trapezius tendons
+Sternocleidomastoid tendons		
+Semispinalis capitis	
+Splenius capitis tendons
+Mylohyoid	
+Thyrohyoid tendons
+Rectus abdominis tendons
+External oblique tendons
+Transversus abdominis tendons
+Erector spinae tendons
