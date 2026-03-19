@@ -31,6 +31,7 @@ function setup() {
     let hyphens = "";
     let hockey = "";
     let anatomy = "";
+    let moviesShows = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -63,8 +64,9 @@ function setup() {
         fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
         fetch('./dictionaries/hyphens.txt').then(x => x.text()),
         fetch('./dictionaries/hockey.txt').then(x => x.text()),
-        fetch('./dictionaries/anatomy.txt').then(x => x.text())
-    ]).then(([data1, data2, data3, data4, data5, data6]) => {
+        fetch('./dictionaries/anatomy.txt').then(x => x.text()),
+        fetch('./dictionaries/moviesShows.txt').then(x => x.text())
+    ]).then(([data1, data2, data3, data4, data5, data6, data7]) => {
         // place them in their respective variables once loaded
         words = data1;
         birds = data2;
@@ -72,9 +74,10 @@ function setup() {
         hyphens = data4;
         hockey = data5;
         anatomy = data6;
+        moviesShows = data7;
 
         // set the default dictionary to be all words
-        dictionary = words + birds + dinos + hyphens + hockey + anatomy;
+        dictionary = words + birds + dinos + hyphens + hockey + anatomy + moviesShows;
 
         // set the prompt function
         prompt = newPrompt();
@@ -296,7 +299,7 @@ function setup() {
         // change the dictionary depending on the selected value
         if (value == "normal") {
             // the 'normal' dictionary includes all other dictionaries that contain valid words that are not proper noun dictionaries
-            dictionary = words + birds + dinos + hyphens + hockey + anatomy;
+            dictionary = words + birds + dinos + hyphens + hockey + anatomy + moviesShows;
         }
         else if (value == "birds") {
             dictionary = birds;
@@ -309,6 +312,9 @@ function setup() {
         }
         else if (value == "anatomy") {
             dictionary = anatomy;
+        }
+        else if (value == "Movies + shows") {
+            dictionary = moviesShows;
         }
     }
 
