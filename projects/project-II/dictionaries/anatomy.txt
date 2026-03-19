@@ -1,0 +1,130 @@
+Chest
+Sternum
+Ribs
+Cervical ribs
+Spine
+Cervical vertebrae
+Thoracic vertebrae
+Lumbar vertebrae
+Sacrum
+Coccyx
+Skull
+Cranial Bones
+Occipital bone
+Parietal bones
+Frontal bone
+Temporal bones
+Ethmoid bone
+Sphenoid bone
+Facial Bones
+Lacrimal bones
+Maxillae
+Nasal bones
+Palatine bones
+Zygomatic bones
+Inferior nasal concha
+Mandible
+Hyoid Bone
+Vomer
+Ear Bones
+Malleus
+Incus
+Stapes
+Pectoral Girdle
+Clavicle
+Scapula
+Arms
+Humerus
+Radius
+Ulna
+Carpals
+Phanages
+Metacarpals
+Pelvic Girdle
+Hip bones
+Legs
+Femur
+Tibia
+Fibula
+Patella
+Tarsals
+Phalanges
+Metatarsals
+
+
+Frontalis
+Depressor supercilii
+Procerus
+Nasalis
+Zygomaticus minor
+Zygomaticus major
+Masseter
+Depressor anguli oris
+Depressor labii inferioris
+Platysma
+Mentalis
+Risorius
+Orbicularis oris
+Levator superioris
+Levator labii superioris alaque nasi
+Temporalis
+Orbicularis oculi
+Corrugator
+Omohyoid
+Sternohyoid
+Sternocleidomastoid
+Trapezius
+Deltoid anterior head
+Deltoid middle head
+Serratus anterior
+External oblique
+Tendinous inscriptions
+Rectus abdominis
+Tensor fasciae latae
+Saratorius
+Pectineus
+Adductor longus
+Iliopsoas
+Gracilis
+Gastrocnemius
+Tibialis anterior
+Peroneus longus
+Extensor digitorum langus
+Soleus
+Pectoralis major
+Pectoralis minor
+Biceps brachii short head
+Biceps brachii long head
+Brachialis
+Brachioradialis
+Palmaris longus
+Extensor carpi ulnaris
+Flexor carpi ulnaris
+Abductor pollicis longus
+Extensor pollicis brevis
+Extensor pollicis longus
+Pronatur teres
+Rectus femoris
+Vastus lateralis
+Vastus medialis
+Teres minor
+Rhomboid major
+Infraspinatus
+Teres major
+Posterior head
+Gluteus medius
+Gluteus maximus
+Gastrocneus
+Peroneus brevis
+Flexor hallucis longus
+Triceps brachii long head
+Medial hand
+Triceps brachii lateral head
+Latissimus dorsi
+Erector spinae
+Thoracolumbar fascia
+Ilotibial band
+Biceos femoris
+Semitendinosus
+Adductor magnus
+Semimembranosus
