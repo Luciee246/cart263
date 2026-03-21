@@ -14,6 +14,24 @@ class DrawingBoard {
     this.canvas.addEventListener("mousemove", function (e) {
       self.overCanvas(e);
     });
+
+    this.canvas.addEventListener("mousemove", (event) => {
+      let rect = this.canvas.getBoundingClientRect();
+      let mx = event.clientX - rect.left;
+      let my = event.clientY - rect.top;
+
+      if (this.id === "partD" && this.listOfObjects.length > 0) {
+        this.listOfObjects[0].updatePositionRect(mx, my);
+      }
+    });
+
+    this.canvas.addEventListener("click", () => {
+      if (this.id === "partD" && this.listOfObjects.length > 0) {
+        let colors = ["red", "blue", "green", "yellow", "purple"];
+        let c = colors[Math.floor(Math.random() * colors.length)];
+        this.listOfObjects[0].changeColor(c);
+      }
+    });
   }
 
   overCanvas(e) {
