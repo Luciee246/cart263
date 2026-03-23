@@ -332,8 +332,17 @@ function setup() {
     let timer = timerTime;
     let gameOn = false;
 
+    const name = document.querySelector("#nameInput").value;
+
+    // New player has joined the server
+    set(ref(db, 'players/test'), {
+        name: name
+    });
+
     // click play button to start
     document.querySelector(".play-button").addEventListener("click", function () {
+
+
         sound2.play();
         gameStart();
 
