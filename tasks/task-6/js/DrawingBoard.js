@@ -1,12 +1,11 @@
 class DrawingBoard {
-  /* Constructor */
   constructor(canvas, context, drawingBoardId) {
     this.canvas = canvas;
     this.context = context;
     this.objectsOnCanvas = [];
     let self = this;
     this.drawingBoardId = drawingBoardId;
-    //each element has a mouse clicked and a mouse over
+
     this.canvas.addEventListener("click", function (e) {
       self.clickCanvas(e);
     });
@@ -15,22 +14,9 @@ class DrawingBoard {
       self.overCanvas(e);
     });
 
-    this.canvas.addEventListener("mousemove", (event) => {
-      let rect = this.canvas.getBoundingClientRect();
-      let mx = event.clientX - rect.left;
-      let my = event.clientY - rect.top;
 
-      if (this.id === "partD" && this.listOfObjects.length > 0) {
-        this.listOfObjects[0].updatePositionRect(mx, my);
-      }
-    });
-
-    this.canvas.addEventListener("click", () => {
-      if (this.id === "partD" && this.listOfObjects.length > 0) {
-        let colors = ["red", "blue", "green", "yellow", "purple"];
-        let c = colors[Math.floor(Math.random() * colors.length)];
-        this.listOfObjects[0].changeColor(c);
-      }
+    window.addEventListener("keydown", function (e) {
+      self.keyPressed(e);
     });
   }
 
@@ -66,7 +52,32 @@ class DrawingBoard {
     //differentiate which canvas
     //you can remove the console.logs /// 
     if (this.drawingBoardId === "partA") {
-      console.log("in A")
+
+      if (e.shiftKey) {
+        // REMOVE circle near mouse
+        this.objectsOnCanvas = this.objectsOnCanvas.filter(obj => {
+          let dx = obj.x - this.mouseOffsetX;
+          let dy = obj.y - this.mouseOffsetY;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          return dist > obj.radius;
+        });
+
+      } else {
+        // ADD new circle
+
+        let radius = Math.random() * 20 + 10;
+
+        let newCircle = new CircularObj(
+          this.mouseOffsetX,
+          this.mouseOffsetY,
+          radius,
+          "#" + Math.floor(Math.random() * 16777215).toString(16),
+          "#E6E6FA",
+          this.context
+        );
+
+        this.addObj(newCircle);
+      }
     }
     if (this.drawingBoardId === "partB") {
       console.log("in B")
@@ -78,22 +89,20 @@ class DrawingBoard {
       console.log("in D")
     }
   }
-  /* method to add obj to canvas */
   addObj(objToAdd) {
     this.objectsOnCanvas.push(objToAdd);
   }
 
-  /* method to add display objects on canvas */
   display() {
     for (let i = 0; i < this.objectsOnCanvas.length; i++) {
       this.objectsOnCanvas[i].display();
     }
   }
 
-  /* method to add animate objects on canvas */
   animate() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
     for (let i = 0; i < this.objectsOnCanvas.length; i++) {
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
       this.objectsOnCanvas[i].update();
       this.objectsOnCanvas[i].display();
     }
@@ -105,5 +114,16 @@ class DrawingBoard {
       this.objectsOnCanvas[i].display();
     }
 
+  }
+
+  keyPressed(e) {
+    if (this.drawingBoardId === "partA") {
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        this.objectsOnCanvas.pop();
+      }
+
+    }
   }
 }
