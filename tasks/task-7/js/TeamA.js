@@ -10,6 +10,11 @@ export class PlanetA {
 
         //Create planet group
         this.group = new THREE.Group()
+        // STEP 4 setup
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        this.clickableModels = [];
+        this.animatedModels = [];
 
         // Create planet
         // THEME: FROGS
@@ -68,11 +73,44 @@ export class PlanetA {
         // Rotate planet
         this.group.rotation.y += delta * 0.5;
 
+        // STEP 4 animation
+        for (let i = this.animatedModels.length - 1; i >= 0; i--) {
+            let anim = this.animatedModels[i];
+            anim.time += 0.1;
+
+            anim.model.position.y = anim.startY + Math.sin(anim.time) * 0.5;
+            anim.model.rotation.y += 0.1;
+
+            if (anim.time > Math.PI) {
+                anim.model.position.y = anim.startY;
+                this.animatedModels.splice(i, 1);
+            }
+        }
+
         //TODO: Do the moon orbits and the model animations here.
     }
 
     click(mouse, scene, camera) {
-        //TODO: Do the raycasting here.
+        this.mouse.x = mouse.x;
+        this.mouse.y = mouse.y;
+
+        this.raycaster.setFromCamera(this.mouse, camera);
+
+        const intersects = this.raycaster.intersectObjects(this.clickableModels, true);
+
+        if (intersects.length > 0) {
+            let clicked = intersects[0].object;
+
+            while (clicked.parent && !this.clickableModels.includes(clicked)) {
+                clicked = clicked.parent;
+            }
+
+            this.animatedModels.push({
+                model: clicked,
+                startY: clicked.position.y,
+                time: 0
+            });
+        }
     }
 }
 
