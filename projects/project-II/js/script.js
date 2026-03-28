@@ -21,6 +21,34 @@
 
 "use strict";
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+import { getAuth } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js'
+import { getDatabase, get, set, ref, push, onDisconnect, remove, update, onValue } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js'
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+    apiKey: "AIzaSyBdD0rHp9nriI124Ub1gdbsaLgR26Fo57s",
+    authDomain: "word-nerd-7bcf7.firebaseapp.com",
+    projectId: "word-nerd-7bcf7",
+    storageBucket: "word-nerd-7bcf7.firebasestorage.app",
+    messagingSenderId: "484707208649",
+    appId: "1:484707208649:web:4c96f5c167ec8ffffdec18",
+    measurementId: "G-L0N55SDFXG"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
+
+// Global database variable to reference in our other scripts
+window.db = getDatabase(app);
+window.auth = getDatabase(app);
+
 window.onload = setup;
 
 function setup() {
@@ -30,8 +58,8 @@ function setup() {
     let dinos = "";
     let hyphens = "";
     let hockey = "";
-    let anatomy = "";
     let moviesShows = "";
+    let anatomy = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -64,8 +92,8 @@ function setup() {
         fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
         fetch('./dictionaries/hyphens.txt').then(x => x.text()),
         fetch('./dictionaries/hockey.txt').then(x => x.text()),
-        fetch('./dictionaries/anatomy.txt').then(x => x.text()),
-        fetch('./dictionaries/moviesShows.txt').then(x => x.text())
+        fetch('./dictionaries/moviesShows.txt').then(x => x.text()),
+        fetch('./dictionaries/anatomy.txt').then(x => x.text())
     ]).then(([data1, data2, data3, data4, data5, data6, data7]) => {
         // place them in their respective variables once loaded
         words = data1;
@@ -73,11 +101,11 @@ function setup() {
         dinos = data3;
         hyphens = data4;
         hockey = data5;
-        anatomy = data6;
-        moviesShows = data7;
+        moviesShows = data6;
+        anatomy = data7;
 
         // set the default dictionary to be all words
-        dictionary = words + birds + dinos + hyphens + hockey + anatomy + moviesShows;
+        dictionary = words + birds + dinos + hyphens + anatomy;
 
         // set the prompt function
         prompt = newPrompt();
@@ -288,18 +316,21 @@ function setup() {
     })
 
     // when something is selected from the dictionaries dropdown list
-    document.querySelector("#dropdown").addEventListener("change", function () {
-        changeDictionary(this.value)
-        sound1.play();
+    // document.querySelector("#dropdown").addEventListener("change", function () {
+    //     changeDictionary(this.value)
+    //     sound1.play();
 
-        saveStateHandler();
-    })
+    //     saveStateHandler();
+    // })
 
     function changeDictionary(value) {
         // change the dictionary depending on the selected value
+        if (host === false) {
+            document.querySelector("#dropdown").value = value;
+        }
         if (value == "normal") {
             // the 'normal' dictionary includes all other dictionaries that contain valid words that are not proper noun dictionaries
-            dictionary = words + birds + dinos + hyphens + hockey + anatomy + moviesShows;
+            dictionary = words + birds + dinos + hyphens;
         }
         else if (value == "birds") {
             dictionary = birds;
@@ -310,61 +341,133 @@ function setup() {
         else if (value == "hockey players") {
             dictionary = hockey;
         }
+        else if (value == "movies/shows") {
+            dictionary = moviesShows;
+        }
         else if (value == "anatomy") {
             dictionary = anatomy;
         }
-        else if (value == "Movies + shows") {
-            dictionary = moviesShows;
-        }
     }
-
-    // update the difficulty based on the slider value
-    document.querySelector(".slider").addEventListener("change", function () {
-        document.querySelector(".difficulty p").textContent = "difficulty: " + this.value;
-
-        difficulty = this.value;
-        sound1.play();
-
-        saveStateHandler();
-    })
 
     // set the timer to be the 
     let timer = timerTime;
     let gameOn = false;
+    let name;
+    let playerRef;
+    let selfPlayerRef;
+    let playerId;
+    let host = false;
 
-    const name = document.querySelector("#nameInput").value;
+    function joinGame() {
+        // display the game
+        document.querySelector(".title-screen").style.display = "none";
+        document.querySelector(".gameplay").style.display = "flex";
 
-    // New player has joined the server
-    set(ref(db, 'players/test'), {
-        name: name
-    });
+        // reference all the player nodes in Firebase
+        playerRef = ref(db, "players/");
+        // new player reference gets pushed into the database
+        selfPlayerRef = push(playerRef);
+        // get your player ID
+        playerId = selfPlayerRef.key;
+
+        // set the base variables for your player in Firebase
+        const dictName = document.querySelector("#dropdown").value;
+        set(selfPlayerRef, {
+            name: name,
+            coins: coins,
+            host: false,
+            dictionary: dictName,
+            difficulty: difficulty
+        })
+
+        // if you close the window or refresh the page, remove your player node from the database
+        onDisconnect(ref(db, "players/" + playerId)).remove();
+
+        // this function fires when player values are updated
+        onValue(playerRef, (snapshot) => {
+
+            const playerArray = [];
+            // loop through the player objects and push them into a local array, along with the respective player keys
+            snapshot.forEach((playerSnapshot) => {
+                const player = playerSnapshot.val();
+                const playerKey = playerSnapshot.key;
+
+                playerArray.push({ playerKey, player });
+            })
+
+            // if your player ID matches the player ID of the first player in the array we got from the database, it means you joined first or you are the only player who has joined, and you are the host or controller of the game
+            if (playerArray[0].playerKey == playerId) {
+                console.log("you are host");
+                host = true;
+                // set your host value to true
+                update(selfPlayerRef, {
+                    host: true
+                })
+            }
+
+            // everyone else
+            else {
+                host = false;
+                changeDictionary(playerArray[0].player.dictionary);
+                difficulty = playerArray[0].player.difficulty;
+                document.querySelector(".difficulty p").textContent = "difficulty: " + difficulty;
+                document.querySelector(".slider").style.display = "none";
+                document.querySelector("#dropdown").style.display = "none";
+                document.querySelector(".dictionaries p").textContent = "dictionary: " + document.querySelector("#dropdown").value;
+                textInput.focus();
+                textInput.value = "";
+                displayText.innerHTML = "";
+            }
+        })
+
+        // only update the dictionary if you are the host
+        document.querySelector("#dropdown").addEventListener("change", function () {
+            if (host === true) {
+                changeDictionary(this.value);
+                sound1.play();
+
+                saveStateHandler();
+
+                // save the dictionary to your Firebase player node
+                update(selfPlayerRef, {
+                    dictionary: this.value
+                })
+            }
+        })
+
+        // update the difficulty based on the slider value
+        document.querySelector(".slider").addEventListener("change", function () {
+            if (host === true) {
+                document.querySelector(".difficulty p").textContent = "difficulty: " + this.value;
+
+                difficulty = this.value;
+                sound1.play();
+
+                saveStateHandler();
+
+                // save the difficulty to your Firebase player node
+                update(selfPlayerRef, {
+                    difficulty: difficulty
+                })
+            }
+        })
+    }
 
     // click play button to start
-    document.querySelector(".play-button").addEventListener("click", function () {
-
+    document.querySelector(".join-button").addEventListener("click", function () {
+        name = document.querySelector("#nameInput").value;
+        joinGame();
 
         sound2.play();
-        gameStart();
+        // gameStart();
+    })
 
-        // The game timer
-        timer = timerTime;
-        const timerInterval = setInterval(myTimer, 1000);
-        function myTimer() {
-            if (timer > 0 && gameOn == true) {
-                timer--;
-            }
+    document.querySelector("#nameInput").addEventListener("keydown", function (e) {
+        if (e.which === 13) {
+            name = document.querySelector("#nameInput").value;
+            joinGame();
 
-            if (timer == 0) {
-                myStopFunction();
-                gameEnd();
-                timer = timerTime;
-            }
-
-            document.querySelector(".timer").textContent = timer;
-        }
-
-        function myStopFunction() {
-            clearInterval(timerInterval);
+            sound2.play();
         }
     })
 
