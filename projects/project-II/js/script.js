@@ -59,7 +59,6 @@ function setup() {
     let hyphens = "";
     let hockey = "";
     let moviesShows = "";
-    let anatomy = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -92,9 +91,8 @@ function setup() {
         fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
         fetch('./dictionaries/hyphens.txt').then(x => x.text()),
         fetch('./dictionaries/hockey.txt').then(x => x.text()),
-        fetch('./dictionaries/moviesShows.txt').then(x => x.text()),
-        fetch('./dictionaries/anatomy.txt').then(x => x.text())
-    ]).then(([data1, data2, data3, data4, data5, data6, data7]) => {
+        fetch('./dictionaries/moviesShows.txt').then(x => x.text())
+    ]).then(([data1, data2, data3, data4, data5, data6]) => {
         // place them in their respective variables once loaded
         words = data1;
         birds = data2;
@@ -102,10 +100,9 @@ function setup() {
         hyphens = data4;
         hockey = data5;
         moviesShows = data6;
-        anatomy = data7;
 
         // set the default dictionary to be all words
-        dictionary = words + birds + dinos + hyphens + anatomy;
+        dictionary = words + birds + dinos + hyphens;
 
         // set the prompt function
         prompt = newPrompt();
@@ -344,9 +341,6 @@ function setup() {
         else if (value == "movies/shows") {
             dictionary = moviesShows;
         }
-        else if (value == "anatomy") {
-            dictionary = anatomy;
-        }
     }
 
     // set the timer to be the 
@@ -387,36 +381,70 @@ function setup() {
         onValue(playerRef, (snapshot) => {
 
             const playerArray = [];
+            const playerContainer = document.querySelector(".players-container");
+            let htmlContent = "";
             // loop through the player objects and push them into a local array, along with the respective player keys
             snapshot.forEach((playerSnapshot) => {
                 const player = playerSnapshot.val();
                 const playerKey = playerSnapshot.key;
 
                 playerArray.push({ playerKey, player });
+
+                if (playerKey == playerId && player.host === false) {
+                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'>" + player.name + " &bullet; " + player.coins + "</div>"
+                }
+                else if (player.host === true && playerKey !== playerId) {
+                    htmlContent += "<div class='player-item'>" + player.name + " &bullet; " + player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                }
+                else if (player.host === true && playerKey == playerId) {
+                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'>" + player.name + " &bullet; " + player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                }
+                else {
+                    htmlContent += "<div class='player-item'>" + player.name + " &bullet; " + player.coins + "</div>"
+                }
+
+                // MAYBE IT WOULD BE COOL TO HAVE A FEW PRESET AVATARS THAT WE CAN CHOOSE FROM TO DISPLAY IN THE GAME
             })
 
+            playerContainer.innerHTML = htmlContent;
+
             // if your player ID matches the player ID of the first player in the array we got from the database, it means you joined first or you are the only player who has joined, and you are the host or controller of the game
-            if (playerArray[0].playerKey == playerId) {
-                console.log("you are host");
-                host = true;
-                // set your host value to true
-                update(selfPlayerRef, {
-                    host: true
-                })
+            if (gameOn === false) {
+                if (playerArray[0].playerKey == playerId) {
+                    console.log("you are host");
+                    host = true;
+                    // set your host value to true
+                    update(selfPlayerRef, {
+                        host: true
+                    })
+
+                    document.querySelector(".play-button").style.display = "block";
+                    document.querySelector(".waiting").style.display = "none";
+                }
+
+                // everyone else
+                else {
+                    host = false;
+                    changeDictionary(playerArray[0].player.dictionary);
+                    difficulty = playerArray[0].player.difficulty;
+                    document.querySelector(".difficulty p").textContent = "difficulty: " + difficulty;
+                    document.querySelector(".slider").style.display = "none";
+                    document.querySelector("#dropdown").style.display = "none";
+                    document.querySelector(".dictionaries p").textContent = "dictionary: " + document.querySelector("#dropdown").value;
+                    textInput.focus();
+                    textInput.value = "";
+                    displayText.innerHTML = "";
+                    document.querySelector(".play-button").style.display = "none";
+                    document.querySelector(".waiting").style.display = "block";
+                }
             }
 
-            // everyone else
-            else {
-                host = false;
-                changeDictionary(playerArray[0].player.dictionary);
-                difficulty = playerArray[0].player.difficulty;
-                document.querySelector(".difficulty p").textContent = "difficulty: " + difficulty;
-                document.querySelector(".slider").style.display = "none";
-                document.querySelector("#dropdown").style.display = "none";
-                document.querySelector(".dictionaries p").textContent = "dictionary: " + document.querySelector("#dropdown").value;
-                textInput.focus();
-                textInput.value = "";
-                displayText.innerHTML = "";
+            if (playerArray[0].player.startGame == true) {
+                startGame();
+                console.log(playerArray[0].playerKey);
+                update(ref(db, "players/" + playerArray[0].playerKey), {
+                    startGame: false
+                })
             }
         })
 
@@ -451,6 +479,33 @@ function setup() {
                 })
             }
         })
+
+        document.querySelector(".play-button").addEventListener("click", function () {
+            if (host === true) {
+                update(selfPlayerRef, {
+                    startGame: true
+                })
+            }
+        })
+
+        function startGame() {
+            gameOn = true;
+            document.querySelector(".slider").style.display = "none";
+            document.querySelector(".play-button").style.display = "none";
+            document.querySelector("#dropdown").style.display = "none";
+            document.querySelector(".dictionaries p").textContent = "dictionary: " + document.querySelector("#dropdown").value;
+            textInput.focus();
+            textInput.value = "";
+            displayText.innerHTML = "";
+            usedWords = [];
+            answerTimes = [];
+            answerPrompts = [];
+            answerStreaks = [];
+            winStreak = 0;
+            coinsChange = 0;
+            document.querySelector(".fire").style.display = "none";
+            // newPrompt();
+        }
     }
 
     // click play button to start
