@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 
 // Planet class for Team A
 export class PlanetA {
@@ -15,6 +16,7 @@ export class PlanetA {
         this.mouse = new THREE.Vector2();
         this.clickableModels = [];
         this.animatedModels = [];
+
 
         // Create planet
         // THEME: FROGS
@@ -49,6 +51,11 @@ export class PlanetA {
         this.planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
         this.group.add(this.planetMesh);
 
+
+
+
+
+
         //STEP 2:
         //TODO: Add from 1 to 3 orbiting moons to the planet group.
         //TODO: The moons should rotate around the planet just like the planet group rotates around the Sun.
@@ -56,7 +63,7 @@ export class PlanetA {
         / Moons */
         this.moons = [];
 
-        // Create 3 moons
+        // Creat 3 moons
         const moonCount = 3;
         for (let i = 0; i < moonCount; i++) {
             //Pivot group for moon orbit
@@ -113,12 +120,87 @@ export class PlanetA {
         //TODO: Load Blender models to populate the planet with multiple props and critters by adding them to the planet group.
         //TODO: Make sure to rotate the models so they are oriented correctly relative to the surface of the planet.
 
+        const loader = new GLTFLoader();
+        const planetRadius = 2;
+
+        const modelsData = [
+            { path: '../models/Tree.glb', scale: 0.35, count: 7 },
+            { path: '../models/Tree_frog.glb', scale: 0.007, count: 3 },
+            { path: '../models/Mushroom.glb', scale: 0.15, count: 3 },
+            { path: '../models/Slug.glb', scale: 0.010, count: 2 }
+        ];
+
+        // Predefined fixed positions on top hemisphere, has to be top hemisphere because we don't want models inside the planet!
+        const positions = [
+            new THREE.Vector3(0, 1, 0),
+            new THREE.Vector3(0.8, 0.6, -0.6),
+            new THREE.Vector3(-0.8, 0.7, 0.6),
+            new THREE.Vector3(0.6, 0.8, 0.9),
+            new THREE.Vector3(-0.5, 0.9, -0.8),
+            new THREE.Vector3(0.3, 1, -0.5),
+            new THREE.Vector3(-0.7, 1, 0.3),
+            new THREE.Vector3(0.9, 1.1, 0.2),
+            new THREE.Vector3(-0.9, 1.1, -0.2),
+            new THREE.Vector3(0.2, 1.2, -0.7),
+            new THREE.Vector3(-0.2, 1.2, 0.7)
+        ];
+
+        let posIndex = 0;
+
+        modelsData.forEach((modelInfo) => {
+            for (let i = 0; i < modelInfo.count; i++) {
+                loader.load(modelInfo.path, (gltf) => {
+                    const model = gltf.scene;
+                    const group = new THREE.Group();
+
+                    // Scale model
+                    model.scale.set(modelInfo.scale, modelInfo.scale, modelInfo.scale);
+
+                    // Offset bottom to Y=0
+                    const bbox = new THREE.Box3().setFromObject(model);
+                    const minY = bbox.min.y;
+                    model.position.y -= minY;
+
+                    group.add(model);
+
+                    // Pick a fixed position and normalize it to planet radius
+                    let pos = positions[posIndex % positions.length].clone().normalize().multiplyScalar(planetRadius + 0.05);
+
+                    // Slugs sit slightly closer to planet (these guys are pissing me off!)
+                    if (modelInfo.path.includes('Slug')) {
+                        pos.multiplyScalar(0.97);
+                    }
+
+                    group.position.copy(pos);
+
+                    // Always upright
+                    group.rotation.set(0, 0, 0);
+                    group.rotateY(Math.random() * Math.PI * 2);
+
+                    // Shadows
+                    group.traverse((child) => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+
+                    this.group.add(group);
+                    this.clickableModels.push(group);
+
+                    posIndex++; // move to next position
+                });
+            }
+        });
+
+
         //STEP 4:
         //TODO: Use raycasting in the click() method below to detect clicks on the models, and make an animation happen when a model is clicked.
         //TODO: Use your imagination and creativity!
 
         this.scene.add(this.group);
     }
+
 
     update(delta) {
         // Orbit around sun
@@ -128,6 +210,11 @@ export class PlanetA {
 
         // Rotate planet
         this.group.rotation.y += delta * 0.5;
+
+        // Rotate moons
+        this.moons.forEach(moon => {
+            moon.pivot.rotation.y += delta * moon.speed;
+        });
 
         // STEP 4 animation
         for (let i = this.animatedModels.length - 1; i >= 0; i--) {
@@ -142,15 +229,8 @@ export class PlanetA {
                 this.animatedModels.splice(i, 1);
             }
         }
-
-        //TODO: Do the moon orbits and the model animations here.
-        // Rotate planet
-        this.group.rotation.y += delta * 0.5;
-        // Rotate moons
-        this.moons.forEach(moon => {
-            moon.pivot.rotation.y += delta * moon.speed;
-        });
     }
+
 
     click(mouse, scene, camera) {
         this.mouse.x = mouse.x;
@@ -176,3 +256,7 @@ export class PlanetA {
     }
 }
 
+//Tree frog by Poly by Google [CC-BY] via Poly Pizza//
+//Slug by Poly by Google [CC-BY] via Poly Pizza// (i hate these guys so much)
+//Mushroom by Quaternius//
+//Tree by Marc SolÃ  [CC-BY] via Poly Pizza//
