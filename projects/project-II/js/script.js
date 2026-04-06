@@ -47,7 +47,7 @@ const app = initializeApp(firebaseConfig);
 
 // Global database variable to reference in our other scripts
 window.db = getDatabase(app);
-window.auth = getDatabase(app);
+window.auth = getAuth(app);
 
 window.onload = setup;
 
@@ -396,7 +396,11 @@ function setup() {
         })
 
         // if you close the window or refresh the page, remove your player node from the database
-        onDisconnect(ref(db, "players/" + playerId)).remove();
+        // FIX THIS
+        onDisconnect(ref(db, "players/" + playerId)).update({
+            connected: false
+        });
+        update(selfPlayerRef, { connected: true });
 
         // this function fires when player values are updated
         onValue(playerRef, (snapshot) => {
