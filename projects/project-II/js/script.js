@@ -317,22 +317,23 @@ function setup() {
                     prompt = newPrompt();
 
                     // next player's turn
-                    if (playerTurn >= playerArray.length - 1) {
-                        playerTurn = 0;
-                    }
-                    else {
-                        playerTurn++;
+                    if (playerArray.length > 0) {
+                        if (playerTurn >= playerArray.length - 1) {
+                            playerTurn = 0;
+                        } else {
+                            playerTurn++;
+                        }
                     }
 
                     // update the host variables with the player turn and prompt
-                    update(ref(db, "players/" + playerArray[0].playerKey), {
-                        playerTurn: playerTurn,
-                        prompt: prompt
-                    })
+                    const hostPlayer = playerArray.find(p => p.player.host === true);
 
-                    update(selfPlayerRef, {
-                        typing: ""
-                    })
+                    if (hostPlayer) {
+                        update(ref(db, "players/" + hostPlayer.playerKey), {
+                            playerTurn: playerTurn,
+                            prompt: prompt
+                        });
+                    }
                 }
 
                 else {
@@ -396,11 +397,12 @@ function setup() {
         })
 
         // if you close the window or refresh the page, remove your player node from the database
-        //FIX THIS
-        onDisconnect(ref(db, "players/" + playerId)).update({
-            connected: false
-        });
+        onDisconnect(ref(db, "players/" + playerId)).remove();
         update(selfPlayerRef, { connected: true });
+
+        window.addEventListener("beforeunload", function () {
+            remove(ref(db, "players/" + playerId));
+        });
 
         // this function fires when player values are updated
         onValue(playerRef, (snapshot) => {
@@ -411,6 +413,8 @@ function setup() {
             // loop through the player objects and push them into a local array, along with the respective player keys
             snapshot.forEach((playerSnapshot) => {
                 const player = playerSnapshot.val();
+                // ignore disconnected players
+                if (player.connected === false) return;
                 const playerKey = playerSnapshot.key;
 
                 playerArray.push({ playerKey, player });
