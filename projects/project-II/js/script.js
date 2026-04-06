@@ -396,7 +396,7 @@ function setup() {
         })
 
         // if you close the window or refresh the page, remove your player node from the database
-        // FIX THIS
+        //FIX THIS
         onDisconnect(ref(db, "players/" + playerId)).update({
             connected: false
         });
