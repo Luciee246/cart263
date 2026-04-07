@@ -318,23 +318,22 @@ function setup() {
                     prompt = newPrompt();
 
                     // next player's turn
-                    if (playerArray.length > 0) {
-                        if (playerTurn >= playerArray.length - 1) {
-                            playerTurn = 0;
-                        } else {
-                            playerTurn++;
-                        }
+                    if (playerTurn >= playerArray.length - 1) {
+                        playerTurn = 0;
+                    }
+                    else {
+                        playerTurn++;
                     }
 
                     // update the host variables with the player turn and prompt
-                    const hostPlayer = playerArray.find(p => p.player.host === true);
+                    update(ref(db, "players/" + playerArray[0].playerKey), {
+                        playerTurn: playerTurn,
+                        prompt: prompt
+                    })
 
-                    if (hostPlayer) {
-                        update(ref(db, "players/" + playerArray[0].playerKey), {
-                            playerTurn: playerTurn,
-                            prompt: prompt
-                        })
-                    }
+                    update(selfPlayerRef, {
+                        typing: ""
+                    })
                 }
 
                 else {
@@ -384,6 +383,9 @@ function setup() {
         let yourTurn = false;
         let resetTurnText = false;
 
+        // if you close the window or refresh the page, remove your player node from the database
+        onDisconnect(selfPlayerRef).remove();
+
         // set the base variables for your player in Firebase
         const dictName = document.querySelector("#dropdown").value;
         set(selfPlayerRef, {
@@ -398,14 +400,6 @@ function setup() {
             typing: ""
         })
 
-        // if you close the window or refresh the page, remove your player node from the database
-        onDisconnect(ref(db, "players/" + playerId)).remove();
-        update(selfPlayerRef, { connected: true });
-
-        window.addEventListener("beforeunload", function () {
-            remove(ref(db, "players/" + playerId));
-        });
-
         // this function fires when player values are updated
         onValue(playerRef, (snapshot) => {
 
@@ -415,11 +409,11 @@ function setup() {
             // loop through the player objects and push them into a local array, along with the respective player keys
             snapshot.forEach((playerSnapshot) => {
                 const player = playerSnapshot.val();
-                // ignore disconnected players
-                if (player.connected === false) return;
                 const playerKey = playerSnapshot.key;
 
                 playerArray.push({ playerKey, player });
+
+                // MAYBE IT WOULD BE COOL TO HAVE A FEW PRESET AVATARS THAT WE CAN CHOOSE FROM TO DISPLAY IN THE GAME
             })
 
             // display the players
@@ -430,11 +424,11 @@ function setup() {
                 }
                 // if the player is not you but is the host
                 else if (playerArray[i].player.host === true && playerArray[i].playerKey !== playerId && i !== playerArray[0].player.playerTurn) {
-                    htmlContent += "<div class='player-item'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                    htmlContent += "<div class='player-item'><img src='./images/avatar-" + playerArray[i].player.avatar + "-crown.png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
                 }
                 // if the player is you and is the host
                 else if (playerArray[i].player.host === true && playerArray[i].playerKey == playerId && i !== playerArray[0].player.playerTurn) {
-                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'><img src='./images/avatar-" + playerArray[i].player.avatar + "-crown.png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
                 }
                 // if it's the player's turn and they are not host
                 else if (i == playerArray[0].player.playerTurn && playerArray[i].player.host === false) {
@@ -442,7 +436,7 @@ function setup() {
                 }
                 // if it's the player's turn and they are host
                 else if (i == playerArray[0].player.playerTurn && playerArray[i].player.host === true) {
-                    htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                    htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'><img src='./images/avatar-" + playerArray[i].player.avatar + "-crown.png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
                 }
                 // if the player is anything else
                 else {
@@ -497,6 +491,7 @@ function setup() {
             // get the index number of your player object in the playerArray
             const myPlayerIndex = playerArray.findIndex(player => player.playerKey === playerId);
 
+            const playerTurnMessage = document.querySelector('.player-turn');
             // check if it's your turn
             if (playerArray[0].player.playerTurn == myPlayerIndex) {
                 textInput.style.display = "inline";
@@ -507,6 +502,8 @@ function setup() {
                     displayText.innerHTML = "";
                     resetTurnText = true;
                 }
+
+                playerTurnMessage.style.display = "none";
             }
             else {
                 textInput.style.display = "none";
@@ -514,6 +511,8 @@ function setup() {
                 yourTurn = false;
                 displayText.innerHTML = playerArray[playerTurn].player.typing;
                 resetTurnText = false;
+                playerTurnMessage.innerHTML = playerArray[playerTurn].player.name + "\'s turn";
+                playerTurnMessage.style.display = "block";
             }
 
             // display the prompt you get from the host
