@@ -47,7 +47,7 @@ const app = initializeApp(firebaseConfig);
 
 // Global database variable to reference in our other scripts
 window.db = getDatabase(app);
-window.auth = getAuth(app);
+window.auth = getDatabase(app);
 
 window.onload = setup;
 
@@ -73,6 +73,7 @@ function setup() {
     let answerTimes = [];
     let answerPrompts = [];
     let answerStreaks = [];
+    let avatar = 1;
 
     // load sounds
     let sound1 = new Audio('./sounds/sound-1.mp3');
@@ -329,10 +330,10 @@ function setup() {
                     const hostPlayer = playerArray.find(p => p.player.host === true);
 
                     if (hostPlayer) {
-                        update(ref(db, "players/" + hostPlayer.playerKey), {
+                        update(ref(db, "players/" + playerArray[0].playerKey), {
                             playerTurn: playerTurn,
                             prompt: prompt
-                        });
+                        })
                     }
                 }
 
@@ -388,6 +389,7 @@ function setup() {
         set(selfPlayerRef, {
             name: name,
             coins: coins,
+            avatar: avatar,
             host: false,
             dictionary: dictName,
             difficulty: difficulty,
@@ -418,34 +420,33 @@ function setup() {
                 const playerKey = playerSnapshot.key;
 
                 playerArray.push({ playerKey, player });
-
             })
 
             // display the players
             for (let i = 0; i < playerArray.length; i++) {
                 // if player is you and not the host
                 if (playerArray[i].playerKey == playerId && playerArray[i].player.host === false && i !== playerArray[0].player.playerTurn) {
-                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
+                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
                 }
                 // if the player is not you but is the host
                 else if (playerArray[i].player.host === true && playerArray[i].playerKey !== playerId && i !== playerArray[0].player.playerTurn) {
-                    htmlContent += "<div class='player-item'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                    htmlContent += "<div class='player-item'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
                 }
                 // if the player is you and is the host
                 else if (playerArray[i].player.host === true && playerArray[i].playerKey == playerId && i !== playerArray[0].player.playerTurn) {
-                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                    htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
                 }
                 // if it's the player's turn and they are not host
                 else if (i == playerArray[0].player.playerTurn && playerArray[i].player.host === false) {
-                    htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
+                    htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
                 }
                 // if it's the player's turn and they are host
                 else if (i == playerArray[0].player.playerTurn && playerArray[i].player.host === true) {
-                    htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
+                    htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<img src='./images/crown.png' class='player-crown'></div>"
                 }
                 // if the player is anything else
                 else {
-                    htmlContent += "<div class='player-item'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
+                    htmlContent += "<div class='player-item'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
                 }
             }
 
@@ -612,12 +613,29 @@ function setup() {
         })
     }
 
-    // document.querySelector(".")
+    let elements = document.getElementsByClassName("avatar");
 
+    function selectAvatar() {
+        const attr = this.getAttribute("src");
+        const attrSplit = attr.split("-");
+        const avatarNum = attrSplit[1].replace(".png", "");
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].classList.remove("avatar-select")
+        }
+        this.classList.add("avatar-select");
+        avatar = avatarNum;
+    }
+
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].addEventListener('click', selectAvatar);
+        // console.log(elements[i]);
+    }
     // click play button to start
     document.querySelector(".join-button").addEventListener("click", function () {
         name = document.querySelector("#nameInput").value;
-        joinGame();
+        if (name.length > 2) {
+            joinGame();
+        }
 
         sound2.play();
         // gameStart();
@@ -626,7 +644,9 @@ function setup() {
     document.querySelector("#nameInput").addEventListener("keydown", function (e) {
         if (e.which === 13) {
             name = document.querySelector("#nameInput").value;
-            joinGame();
+            if (name.length > 2) {
+                joinGame();
+            }
 
             sound2.play();
         }
