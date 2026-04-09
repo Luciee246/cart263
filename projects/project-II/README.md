@@ -18,7 +18,7 @@ A game of making words with given bigrams
     - Words must be at least 3 letters long
     - Words must include the bigram prompt
     - Gain 1 coin for every correct answer
-    - Gain 3 extra coins for words long than 15 characters or longer
+    - Gain 3 extra coins for words with 15 characters or longer
     - Gain 3 extra coins for hyphenated words
     - Gain 3 extra coins for maintaining a win streak of 5 or more
 
