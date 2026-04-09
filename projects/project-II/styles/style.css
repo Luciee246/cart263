@@ -89,7 +89,6 @@ header {
     font-size: 6rem;
     font-weight: 500;
     color: var(--tertiary);
-
 }
 
 #textInput {
@@ -493,7 +492,7 @@ option {
     display: flex;
     flex-direction: column;
     left: 30px;
-    top: 130px;
+    top: 180px;
     font-size: 1.2rem;
     gap: 10px;
 }
@@ -503,10 +502,12 @@ option {
     padding: 15px;
     background-color: rgba(125, 125, 125, 0.1);
     border-radius: var(--radius);
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
     height: 3rem;
+    position: relative;
     overflow: hidden;
+    padding-left: 60px;
 }
 
 .player-item-avatar {
@@ -514,6 +515,8 @@ option {
     height: 64px;
     margin-top: 10px;
     margin-left: -16px;
+    position: absolute;
+    left: 13px;
 }
 
 .play-button {
@@ -553,11 +556,23 @@ option {
     cursor: pointer;
     -webkit-user-drag: none;
     user-select: none;
+    transition: all 0.3s;
+    border-radius: var(--radius);
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+    background: rgb(from var(--tertiary) r g b / 0.2);
 }
 
 .avatar-select {
     background: var(--tertiary);
     border-radius: var(--radius);
+}
+
+.avatar-select:hover {
+    transform: scale(1);
+    background: var(--tertiary);
 }
 
 .player-turn {
@@ -616,6 +631,10 @@ option {
 
     .coins p span {
         display: none;
+    }
+
+    .players-container {
+        top: 130px;
     }
 }
 
