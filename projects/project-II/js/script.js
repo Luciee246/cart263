@@ -74,6 +74,7 @@ function setup() {
     let avatar = 1;
     let yourTurnTrigger = false;
     let turnTimer;
+    let streakTimer;
 
     // load sounds
     let sound1 = new Audio('./sounds/sound-1.mp3');
@@ -223,6 +224,9 @@ function setup() {
                     // add extra coins if the streak is ongoing
                     if (winStreak > 4) {
                         coinCount = coinCount + 3;
+                        update(selfPlayerRef, {
+                            winStreak: true
+                        })
                     }
 
                     // coins is the TOTAL coins and coinCount is the counted coins for any given prompt answer. coinsChange counts the coins per round
@@ -310,17 +314,6 @@ function setup() {
                     // add 1 to the win streak unless their time is over 5 seconds
                     winStreak++;
 
-                    update(selfPlayerRef, {
-                        winStreak: winStreak
-                    })
-
-                    if (promptTime > 5000) {
-                        winStreak = 0;
-                        update(selfPlayerRef, {
-                            winStreak: 0
-                        })
-                    }
-
                     // log the win streak and call for a new prompt
                     answerStreaks.push(winStreak);
 
@@ -353,14 +346,24 @@ function setup() {
                         typing: ""
                     })
 
+                    // if (playerArray.length === 1) {
+                    //     streakTimer = setTimeout(function() {
+                    //         winStreak = 0;
+                    //         console.log("end streak")
+                    //         update(selfPlayerRef, {
+                    //             winStreak: false
+                    //         })
+                    //     }, 5000)
+                    // }
+
                     yourTurnTrigger = false;
                     clearTimeout(turnTimer);
+                    clearTimeout(streakTimer);
                 }
 
                 else {
                     // if the player gets the answer wrong, reset the win streak and play the incorrect animation
                     soundIncorrect.play();
-                    winStreak = 0;
                     displayText.style.color = "var(--tertiary)";
                     displayText.style.animation = "shake 0.3s ease-out";
                     setTimeout(function () {
@@ -374,6 +377,11 @@ function setup() {
                             health: playerArray[playerTurn].player.health - 5
                         })
                     }
+
+                    winStreak = 0;
+                    update(selfPlayerRef, {
+                        winStreak: false
+                    })
                 }
 
                 // at 5 consecutive correct answers, display the fire to indicate the player's win streak
@@ -453,7 +461,7 @@ function setup() {
                 playing: false,
                 waiting: false,
                 usedWords: [],
-                winStreak: 0
+                winStreak: false
             })
         }
 
@@ -593,41 +601,56 @@ function setup() {
                         displayText.style.opacity = "1";
                         document.querySelector(".prompt-container").style.opacity = "1";
 
-                        if (yourTurnTrigger === false && playerArray.length > 1 && playerArray[myPlayerIndex].player.health > 0) {
-                            textInput.value = "";
+                        if (yourTurnTrigger === false) {
+                            if (playerArray.length > 1) {
+
+                            }
                             yourTurnTrigger = true;
-                            // when the timer runs out, knock health and go to next player
-                            turnTimer = setTimeout(function () {
-                                console.log("TIMER DONE");
+
+                            if (playerArray.length > 1 && playerArray[myPlayerIndex].player.health > 0) {
+                                textInput.value = "";
+
+                                // when the timer runs out, knock health and go to next player
+                                turnTimer = setTimeout(function () {
+                                    console.log("TIMER DONE");
 
 
-                                // next player's turn
-                                if (playerTurn >= playerArray.length - 1) {
-                                    playerTurn = 0;
-                                }
-                                else {
-                                    playerTurn++;
-                                }
+                                    // next player's turn
+                                    if (playerTurn >= playerArray.length - 1) {
+                                        playerTurn = 0;
+                                    }
+                                    else {
+                                        playerTurn++;
+                                    }
 
-                                // update the host variables with the player turn and prompt
-                                update(ref(db, "players/" + playerArray[0].playerKey), {
-                                    playerTurn: playerTurn,
-                                    prompt: prompt
-                                })
+                                    // update the host variables with the player turn and prompt
+                                    update(ref(db, "players/" + playerArray[0].playerKey), {
+                                        playerTurn: playerTurn,
+                                        prompt: prompt
+                                    })
 
-                                const promptIndex = bigrams.findIndex(row => row[0] === prompt);
+                                    const promptIndex = bigrams.findIndex(row => row[0] === prompt);
 
-                                let newHealth = playerArray[myPlayerIndex].player.health - (bigrams.length - promptIndex) / 15;
+                                    let newHealth = playerArray[myPlayerIndex].player.health - (bigrams.length - promptIndex) / 15;
 
-                                if (newHealth <= 0) {
-                                    newHealth = 0;
-                                }
+                                    if (newHealth <= 0) {
+                                        newHealth = 0;
+                                    }
 
+                                    update(selfPlayerRef, {
+                                        typing: "",
+                                        health: newHealth
+                                    })
+                                }, 10000)
+                            }
+
+                            streakTimer = setTimeout(function () {
+                                winStreak = 0;
+                                console.log("END STREAK");
                                 update(selfPlayerRef, {
-                                    typing: "",
-                                    health: newHealth
+                                    winStreak: false
                                 })
-                            }, 10000)
+                            }, 5000)
                         }
 
                         // skip your turn if you're dead
