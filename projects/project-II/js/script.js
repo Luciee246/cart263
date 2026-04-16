@@ -458,7 +458,6 @@ function setup() {
                     playerArray.push({ playerKey, player });
                     // }
 
-                    // MAYBE IT WOULD BE COOL TO HAVE A FEW PRESET AVATARS THAT WE CAN CHOOSE FROM TO DISPLAY IN THE GAME
                 })
 
                 // display the players
