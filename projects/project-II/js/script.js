@@ -26,11 +26,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
 import { getAuth } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js'
 import { getDatabase, get, set, ref, push, onDisconnect, remove, update, onValue, onChildAdded, onChildRemoved, query, orderByChild, limitToFirst } from 'https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js'
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBdD0rHp9nriI124Ub1gdbsaLgR26Fo57s",
     authDomain: "word-nerd-7bcf7.firebaseapp.com",
@@ -43,7 +41,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
 
 // Global database variable to reference in our other scripts
 window.db = getDatabase(app);
@@ -59,6 +56,7 @@ function setup() {
     let hyphens = "";
     let hockey = "";
     let moviesShows = "";
+    let anatomy = "";
     let prompt;
     let dictionary = "";
     let difficulty = 1;
@@ -94,8 +92,9 @@ function setup() {
         fetch('./dictionaries/dinosaurs.txt').then(x => x.text()),
         fetch('./dictionaries/hyphens.txt').then(x => x.text()),
         fetch('./dictionaries/hockey.txt').then(x => x.text()),
-        fetch('./dictionaries/moviesShows.txt').then(x => x.text())
-    ]).then(([data1, data2, data3, data4, data5, data6]) => {
+        fetch('./dictionaries/moviesShows.txt').then(x => x.text()),
+        fetch('./dictionaries/anatomy.txt').then(x => x.text())
+    ]).then(([data1, data2, data3, data4, data5, data6, data7]) => {
         // place them in their respective variables once loaded
         words = data1;
         birds = data2;
@@ -103,9 +102,10 @@ function setup() {
         hyphens = data4;
         hockey = data5;
         moviesShows = data6;
+        anatomy = data7;
 
         // set the default dictionary to be all words
-        dictionary = words + birds + dinos + hyphens;
+        dictionary = words + birds + dinos + hyphens + anatomy;
 
         // set the prompt function
         prompt = newPrompt();
@@ -138,14 +138,6 @@ function setup() {
         return prompt;
     }
 
-    // when something is selected from the dictionaries dropdown list
-    // document.querySelector("#dropdown").addEventListener("change", function () {
-    //     changeDictionary(this.value)
-    //     sound1.play();
-
-    //     saveStateHandler();
-    // })
-
     function changeDictionary(value) {
         // change the dictionary depending on the selected value
         if (host === false) {
@@ -167,10 +159,11 @@ function setup() {
         else if (value == "movies/shows") {
             dictionary = moviesShows;
         }
+        else if (value == "anatomy") {
+            dictionary = anatomy;
+        }
     }
 
-    // set the timer to be the 
-    let timer = timerTime;
     let gameOn = false;
     let name;
     let playerRef;
@@ -191,7 +184,13 @@ function setup() {
                 // simmilar check but for systems using LF line break formatting (GitHub) instead of CLRF like the above
                 const result2 = dict.includes("\n" + answer + "\n");
                 const checkInclude = answer.includes(prompt);
-                const checkDuplicates = usedWords.includes(answer);
+                let checkDuplicates;
+                if (playerArray[0].player.usedWords) {
+                    checkDuplicates = playerArray[0].player.usedWords.includes(answer);
+                }
+                else {
+                    checkDuplicates = false;
+                }
 
                 // if the dictionary includes the typed answer, the typed answer includes the given prompt, is longer than 2 characters, and hasn't been typed already yet, the output is correct
                 if ((result == true || result2 == true) && checkInclude == true && answer.length > 2 && checkDuplicates == false) {
@@ -227,7 +226,6 @@ function setup() {
                     }
 
                     // coins is the TOTAL coins and coinCount is the counted coins for any given prompt answer. coinsChange counts the coins per round
-
                     coins += coinCount;
                     coinsChange += coinCount;
 
@@ -237,7 +235,7 @@ function setup() {
                     coinSpin += 360;
                     document.querySelector(".coin-icon").style.transform = "rotateY(" + coinSpin + "deg)";
 
-                    // get the position of the part of the answer that cointains the prompt. In this case, it's the only span element
+                    // get the position of the part of the answer that contains the prompt. In this case, it's the only span element
                     const span = document.querySelector('.displayText span');
                     let rect;
                     if (span) {
@@ -285,9 +283,11 @@ function setup() {
 
                                     // change the coin's velocity by a negative gravitational accelerant constant
                                     coinVY += -18 * deltaTime;
+
                                     // update the x and y positions based on the velocities
                                     coinY += coinVY;
                                     coinX += coinVX - 2.5;
+
                                     // update the element position
                                     newCoin.style.bottom = rect.bottom + coinY + "px";
                                     newCoin.style.left = rect.left + coinX + "px";
@@ -307,11 +307,18 @@ function setup() {
                     answerTimes.push(promptTime);
                     answerPrompts.push(prompt);
 
-                    // add 1 to the win streak unless their time is over 4.5 seconds
+                    // add 1 to the win streak unless their time is over 5 seconds
                     winStreak++;
+
+                    update(selfPlayerRef, {
+                        winStreak: winStreak
+                    })
 
                     if (promptTime > 5000) {
                         winStreak = 0;
+                        update(selfPlayerRef, {
+                            winStreak: 0
+                        })
                     }
 
                     // log the win streak and call for a new prompt
@@ -327,10 +334,19 @@ function setup() {
                         playerTurn++;
                     }
 
+                    let newUsedWords = playerArray[0].player.usedWords;
+                    if (!newUsedWords) {
+                        newUsedWords = [];
+                        newUsedWords.push(answer);
+                    }
+                    else {
+                        newUsedWords.push(answer);
+                    }
                     // update the host variables with the player turn and prompt
                     update(ref(db, "players/" + playerArray[0].playerKey), {
                         playerTurn: playerTurn,
-                        prompt: prompt
+                        prompt: prompt,
+                        usedWords: newUsedWords
                     })
 
                     update(selfPlayerRef, {
@@ -435,7 +451,9 @@ function setup() {
                 prompt: "er",
                 typing: "",
                 playing: false,
-                waiting: false
+                waiting: false,
+                usedWords: [],
+                winStreak: 0
             })
         }
 
@@ -446,58 +464,34 @@ function setup() {
         // this function fires when player values are updated
         onValue(playerRef, (snapshot) => {
             if (snapshot.exists()) {
-                const playerContainer = document.querySelector(".players-container");
-                let htmlContent = "";
                 playerArray = [];
                 // loop through the player objects and push them into a local array, along with the respective player keys
                 snapshot.forEach((playerSnapshot) => {
                     const player = playerSnapshot.val();
                     const playerKey = playerSnapshot.key;
 
-                    // if (player.waiting === false) {
+                    // if there is no player waiting while a game is being played, add the player to the game
                     playerArray.push({ playerKey, player });
-                    // }
 
                 })
 
                 // display the players
-                // let playerItems = document.getElementsByClassName("player-item");
                 document.querySelector(".players-container").innerHTML = "";
 
-                // console.log(alivePlayers);
-                // console.log(playerArray[0])
                 for (let i = 0; i < playerArray.length; i++) {
-                    // playerItems[i].item.style.backgroundColor = "rgba(125, 125, 125, 0.1";
-                    // playerItems[i].item.style.color = "var(--primary)";
-
-                    // if (playerArray[i].playerKey == playerId) {
-                    //     playerItems[i].item.style.backgroundColor = "var(--primary)";
-                    //     playerItems[i].item.style.color = "var(--secondary)";
-                    // }
-
-                    // if (playerArray[i].player.host === true) {
-                    //     playerItems[i].item.querySelector(".player-item-avatar").src = "./images/avatar-" + playerArray[i].player.avatar + "-crown.png"
-                    // }
-                    // else {
-                    //     playerItems[i].item.querySelector(".player-item-avatar").src = "./images/avatar-" + playerArray[i].player.avatar + ".png"
-                    // }
-
-                    // if (i == playerArray[0].player.playerTurn) {
-                    //     playerItems[i].item.style.backgroundColor = "var(--tertiary)";
-                    //     playerItems[i].item.style.color = "var(--primary)";
-                    // }
-
 
                     const newPlayerItem = document.createElement('div');
 
                     newPlayerItem.innerHTML = "<img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<div class='health'></div";
                     newPlayerItem.className = "player-item";
 
+                    // if the player is you
                     if (playerArray[i].playerKey == playerId) {
                         newPlayerItem.style.backgroundColor = "var(--primary)";
                         newPlayerItem.style.color = "var(--secondary)";
                     }
 
+                    // whichever player is the host gets the crown
                     if (playerArray[i].player.host === true) {
                         newPlayerItem.querySelector(".player-item-avatar").src = "./images/avatar-" + playerArray[i].player.avatar + "-crown.png"
                     }
@@ -507,6 +501,7 @@ function setup() {
                     }
 
                     if (gameOn) {
+                        // color changes between whoever's turn it is
                         if (i == playerArray[0].player.playerTurn) {
                             newPlayerItem.style.backgroundColor = "rgb(from var(--tertiary) r g b / 0.3)";
                             newPlayerItem.style.color = "var(--primary)";
@@ -514,6 +509,7 @@ function setup() {
 
                         newPlayerItem.querySelector(".health").style.width = playerArray[i].player.health + "%";
 
+                        // if they're dead
                         if (playerArray[i].player.health <= 0) {
                             newPlayerItem.style.filter = "grayscale() brightness(80%)";
                         }
@@ -524,39 +520,7 @@ function setup() {
 
 
                     document.querySelector(".players-container").appendChild(newPlayerItem);
-
-                    // if (playerArray[0].player.playing == true && playerArray[i].player.playing == true) {
-                    //     update(selfPlayerRef, {
-                    //         waiting: true
-                    //     })
-                    // }
-                    // if player is you and not the host
-                    // if (playerArray[i].playerKey == playerId && playerArray[i].player.host === false && i !== playerArray[0].player.playerTurn) {
-                    //     htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
-                    // }
-                    // // if the player is not you but is the host
-                    // else if (playerArray[i].player.host === true && playerArray[i].playerKey !== playerId && i !== playerArray[0].player.playerTurn) {
-                    //     htmlContent += "<div class='player-item'><img src='./images/avatar-" + playerArray[i].player.avatar + "-crown.png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
-                    // }
-                    // // if the player is you and is the host
-                    // else if (playerArray[i].player.host === true && playerArray[i].playerKey == playerId && i !== playerArray[0].player.playerTurn) {
-                    //     htmlContent += "<div class='player-item' style='background-color: var(--primary); color: var(--secondary)'><img src='./images/avatar-" + playerArray[i].player.avatar + "-crown.png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
-                    // }
-                    // // if it's the player's turn and they are not host
-                    // else if (i == playerArray[0].player.playerTurn && playerArray[i].player.host === false && gameOn === true) {
-                    //     htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
-                    // }
-                    // // if it's the player's turn and they are host
-                    // else if (i == playerArray[0].player.playerTurn && playerArray[i].player.host === true && gameOn === true) {
-                    //     htmlContent += "<div class='player-item' style='background-color: var(--tertiary); color: var(--primary);'><img src='./images/avatar-" + playerArray[i].player.avatar + "-crown.png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
-                    // }
-                    // // if the player is anything else
-                    // else {
-                    //     htmlContent += "<div class='player-item'><img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "</div>"
-                    // }
                 }
-
-                // playerContainer.innerHTML = htmlContent;
 
                 // if your player ID matches the player ID of the first player in the array we got from the database, it means you joined first or you are the only player who has joined, and you are the host or controller of the game
                 if (gameOn === false) {
@@ -613,12 +577,6 @@ function setup() {
                 // get the index number of your player object in the playerArray
                 const myPlayerIndex = playerArray.findIndex(player => player.playerKey === playerId);
 
-                // if (playerArray[0].player.playing === true && playerArray[myPlayerIndex].player.playing === false) {
-                //     update(selfPlayerRef, {
-                //         waiting: true
-                //     })
-                // }
-
                 const playerTurnMessage = document.querySelector('.player-turn');
                 // check if it's your turn
                 if (gameOn === true) {
@@ -642,8 +600,6 @@ function setup() {
                             turnTimer = setTimeout(function () {
                                 console.log("TIMER DONE");
 
-                                // Log this back in if you want the prompt to change after someone's timer runs out
-                                // prompt = newPrompt();
 
                                 // next player's turn
                                 if (playerTurn >= playerArray.length - 1) {
@@ -671,8 +627,7 @@ function setup() {
                                     typing: "",
                                     health: newHealth
                                 })
-                                // come back
-                            }, 5000)
+                            }, 10000)
                         }
 
                         // skip your turn if you're dead
@@ -727,55 +682,6 @@ function setup() {
                 }, 100)
             }
         })
-
-
-        // if (playerArray[0].player.playing === true) {
-        //     update(selfPlayerRef, {
-        //         waiting: true
-        //     })
-        // }
-
-        // let playerItems = [];
-        // onChildAdded(playerRef, (snapshot) => {
-        //     const newPlayer = snapshot.val();
-        //     const newPlayerKey = snapshot.key;
-
-        //     const newPlayerItem = document.createElement('div');
-
-        //     newPlayerItem.innerHTML = "<img src='./images/avatar-" + newPlayer.avatar + ".png' class='player-item-avatar'>" + newPlayer.name + " &bullet; " + newPlayer.coins;
-        //     newPlayerItem.className = "player-item";
-        //     newPlayerItem.id = newPlayerKey;
-
-        //     playerItems.push({timestamp: newPlayer.timestamp, item: newPlayerItem, key: newPlayerKey});
-        //     playerItems.sort(function(x, y){
-        //         return x.timestamp - y.timestamp;
-        //     })
-        //     // console.log(playerItems);
-
-        //     for (let i = 0; i < playerItems.length; i++) {
-        //         console.log(playerItems[i]);
-        //         document.querySelector(".players-container").appendChild(playerItems[i].item);
-        //     }
-        // })
-
-        // onChildRemoved(playerRef, (snapshot) => {
-        //     const removePlayerKey = snapshot.key;
-        //     // const index = playerItems.indexOf(removePlayerKey);
-        //     // console.log(index);
-        //     document.getElementById(removePlayerKey).remove();
-        // })
-
-        // function updatePlayerList() {
-        //     console.log(playerArray);
-        //     for (let i = 0; i < playerArray.length; i++) {
-        //         const newPlayerItem = document.createElement('div');
-
-        //         newPlayerItem.innerHTML = playerArray[i].player.name;
-        //         newPlayerItem.className = "player-item";
-
-        //         document.querySelector(".players-container").appendChild(newPlayerItem);
-        //     }
-        // }
 
         // only update the dictionary if you are the host
         document.querySelector("#dropdown").addEventListener("change", function () {
@@ -855,20 +761,18 @@ function setup() {
             gameOn = false;
             document.querySelector(".slider").style.display = "block";
             document.querySelector(".play-button").style.display = "block";
-            // document.querySelector(".waiting").style.display = "block";
             document.querySelector("#dropdown").style.display = "block";
             document.querySelector(".prompt-container").style.display = "none";
             document.querySelector("#textInput").style.display = "none";
             document.querySelector(".displayText").style.display = "none";
             document.querySelector(".dictionaries p").textContent = "dictionary: ";
             document.querySelector('.player-turn').style.display = "none";
-            document.querySelector(".waiting").textContent = "Waiting for host to start"
+            document.querySelector(".waiting").textContent = "Waiting for host to start";
 
             if (waiting === false) {
                 update(selfPlayerRef, {
                     health: 100,
                     playing: false,
-                    // waiting: false
                 })
             }
             else {
@@ -922,8 +826,8 @@ function setup() {
 
     for (let i = 0; i < elements.length; i++) {
         elements[i].addEventListener('click', selectAvatar);
-        // console.log(elements[i]);
     }
+
     // click play button to start
     document.querySelector(".join-button").addEventListener("click", function () {
         name = document.querySelector("#nameInput").value;
@@ -932,7 +836,6 @@ function setup() {
         }
 
         sound2.play();
-        // gameStart();
     })
 
     document.querySelector("#nameInput").addEventListener("keydown", function (e) {
@@ -991,10 +894,6 @@ function setup() {
         textInput.focus();
     })
 
-
-
-    // uncomment the below line to clear the saved settings and coins for testing purposes
-    // localStorage.clear();
 
     // save game settings and coin amount
     function saveStateHandler() {
