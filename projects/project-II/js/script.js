@@ -64,7 +64,6 @@ function setup() {
     let coins = 0;
     let coinsChange = 0
     let coinSpin = 0;
-    let timerTime = 60;
     let winStreak = 0;
     let winStreakSound = false;
     let promptTime;
@@ -120,8 +119,6 @@ function setup() {
     let textInput = document.querySelector('#textInput');
     let displayText = document.querySelector(".displayText");
 
-
-
     function newPrompt() {
         // initial prompt calculation that randomly picks from the list of bigrams array in bigrams.js based on the current set difficulty
         prompt = bigrams[Math.floor(Math.random() * (bigrams.length / 10 * difficulty - 1))][0];
@@ -168,6 +165,7 @@ function setup() {
     let gameOn = false;
     let name;
     let playerRef;
+    let messageRef;
     let selfPlayerRef;
     let playerId;
     let host = false;
@@ -185,6 +183,7 @@ function setup() {
                 // simmilar check but for systems using LF line break formatting (GitHub) instead of CLRF like the above
                 const result2 = dict.includes("\n" + answer + "\n");
                 const checkInclude = answer.includes(prompt);
+                // check for used words in the master list stored as an array in the host node
                 let checkDuplicates;
                 if (playerArray[0].player.usedWords) {
                     checkDuplicates = playerArray[0].player.usedWords.includes(answer);
@@ -195,7 +194,12 @@ function setup() {
 
                 // if the dictionary includes the typed answer, the typed answer includes the given prompt, is longer than 2 characters, and hasn't been typed already yet, the output is correct
                 if ((result == true || result2 == true) && checkInclude == true && answer.length > 2 && checkDuplicates == false) {
+                    clearTimeout(turnTimer);
+                    clearTimeout(streakTimer);
+                    yourTurnTrigger = false;
+
                     usedWords.push(answer);
+
                     textInput.value = "";
 
                     // add 1 coin for each correct answer, 3 more for words longer than 14 characters, and 3 more for hyphenated words
@@ -234,6 +238,10 @@ function setup() {
                     coinsChange += coinCount;
 
                     document.querySelector(".coins p").innerHTML = "<span>coins: </span>" + coins;
+                    update(selfPlayerRef, {
+                        coins: coins
+                    })
+                    saveStateHandler();
 
                     // coin icon spins 360 deg every correct answer
                     coinSpin += 360;
@@ -305,17 +313,8 @@ function setup() {
                         }, 5)
                     }
 
-                    // get the difference of time between the two Date() objects (it gives it in milliseconds)
-                    promptTime = (new Date()) - promptTime;
-                    // log the time difference and the prompt itself so we know how long it takes for the player to answer each prompt
-                    answerTimes.push(promptTime);
-                    answerPrompts.push(prompt);
-
-                    // add 1 to the win streak unless their time is over 5 seconds
+                    // add 1 to the win streak
                     winStreak++;
-
-                    // log the win streak and call for a new prompt
-                    answerStreaks.push(winStreak);
 
                     prompt = newPrompt();
 
@@ -327,6 +326,7 @@ function setup() {
                         playerTurn++;
                     }
 
+                    // update the used words master list in the player node
                     let newUsedWords = playerArray[0].player.usedWords;
                     if (!newUsedWords) {
                         newUsedWords = [];
@@ -335,7 +335,7 @@ function setup() {
                     else {
                         newUsedWords.push(answer);
                     }
-                    // update the host variables with the player turn and prompt
+                    // update the host variables with the player turn, prompt, and used words
                     update(ref(db, "players/" + playerArray[0].playerKey), {
                         playerTurn: playerTurn,
                         prompt: prompt,
@@ -345,20 +345,6 @@ function setup() {
                     update(selfPlayerRef, {
                         typing: ""
                     })
-
-                    // if (playerArray.length === 1) {
-                    //     streakTimer = setTimeout(function() {
-                    //         winStreak = 0;
-                    //         console.log("end streak")
-                    //         update(selfPlayerRef, {
-                    //             winStreak: false
-                    //         })
-                    //     }, 5000)
-                    // }
-
-                    yourTurnTrigger = false;
-                    clearTimeout(turnTimer);
-                    clearTimeout(streakTimer);
                 }
 
                 else {
@@ -371,32 +357,29 @@ function setup() {
                         displayText.style.animation = "none";
                     }, 500)
 
-                    // knock some health off
+                    // knock some health off as well
                     if (playerArray[playerTurn].player.health > 0) {
                         update(selfPlayerRef, {
                             health: playerArray[playerTurn].player.health - 5
                         })
                     }
 
+                    // cancel the win streak
                     winStreak = 0;
                     update(selfPlayerRef, {
                         winStreak: false
                     })
                 }
 
-                // at 5 consecutive correct answers, display the fire to indicate the player's win streak
-                if (winStreak > 4) {
-                    document.querySelector(".fire").style.display = "block";
-
+                // at 5 consecutive correct answers, play the win streak sound
+                if (winStreak > 5) {
                     if (!winStreakSound) {
                         winStreakSound = true;
                         soundFire.play();
                     }
                 }
-
                 else {
                     winStreakSound = false;
-                    document.querySelector(".fire").style.display = "none";
                 }
             }
         })
@@ -408,6 +391,10 @@ function setup() {
 
         // reference all the player nodes in Firebase
         playerRef = ref(db, "players/");
+
+        // reference the chat messages
+        messageRef = ref(db, "messages/");
+
         // new player reference gets pushed into the database
         selfPlayerRef = push(playerRef);
         // get your player ID
@@ -423,21 +410,36 @@ function setup() {
         // if you close the window or refresh the page, remove your player node from the database
         onDisconnect(selfPlayerRef).remove();
 
+        // send a leave message on disconnect
+        const leaveMessageRef = push(messageRef);
+
+        onDisconnect(leaveMessageRef).set({
+            name: name,
+            status: "leave"
+        });
+
+        const dictName = document.querySelector("#dropdown").value;
+
+        // initial query to see if there is someone already in the game
         const firstPlayerQuery = query(playerRef, limitToFirst(1))
         get(firstPlayerQuery).then((snapshot) => {
             if (snapshot.exists()) {
                 snapshot.forEach((playerSnapshot) => {
                     const player = playerSnapshot.val();
 
+                    // check if that player is already playing
                     if (player.playing === true) {
+                        // set your status to wait for them to stop playing
                         waiting = true;
                         document.querySelector(".waiting").textContent = "Waiting for " + player.name + "\'s game to end"
                     }
+                    // if they're not, join the game
                     else {
                         createPlayer();
                     }
                 })
             }
+            // if no one is in the game, join the game
             else {
                 createPlayer();
             }
@@ -466,9 +468,6 @@ function setup() {
         }
 
 
-        const dictName = document.querySelector("#dropdown").value;
-
-
         // this function fires when player values are updated
         onValue(playerRef, (snapshot) => {
             if (snapshot.exists()) {
@@ -478,19 +477,18 @@ function setup() {
                     const player = playerSnapshot.val();
                     const playerKey = playerSnapshot.key;
 
-                    // if there is no player waiting while a game is being played, add the player to the game
+                    // push each player object into the local array
                     playerArray.push({ playerKey, player });
-
                 })
 
                 // display the players
                 document.querySelector(".players-container").innerHTML = "";
 
                 for (let i = 0; i < playerArray.length; i++) {
-
+                    // for each player in the array, create a player item that is displayed
                     const newPlayerItem = document.createElement('div');
 
-                    newPlayerItem.innerHTML = "<img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<div class='health'></div";
+                    newPlayerItem.innerHTML = "<img src='./images/avatar-" + playerArray[i].player.avatar + ".png' class='player-item-avatar'>" + playerArray[i].player.name + " &bullet; " + playerArray[i].player.coins + "<div class='health'></div><img src='./images/fire.gif' class='fire'>";
                     newPlayerItem.className = "player-item";
 
                     // if the player is you
@@ -499,33 +497,40 @@ function setup() {
                         newPlayerItem.style.color = "var(--secondary)";
                     }
 
-                    // whichever player is the host gets the crown
+                    // if the player is the host, display the crown
                     if (playerArray[i].player.host === true) {
                         newPlayerItem.querySelector(".player-item-avatar").src = "./images/avatar-" + playerArray[i].player.avatar + "-crown.png"
                     }
-
                     else {
                         newPlayerItem.querySelector(".player-item-avatar").src = "./images/avatar-" + playerArray[i].player.avatar + ".png"
                     }
 
                     if (gameOn) {
-                        // color changes between whoever's turn it is
+                        // if it's the player's turn, highlight them red
                         if (i == playerArray[0].player.playerTurn) {
                             newPlayerItem.style.backgroundColor = "rgb(from var(--tertiary) r g b / 0.3)";
                             newPlayerItem.style.color = "var(--primary)";
                         }
 
+                        // display the health bar
                         newPlayerItem.querySelector(".health").style.width = playerArray[i].player.health + "%";
 
-                        // if they're dead
+                        // if they're dead, gray them out
                         if (playerArray[i].player.health <= 0) {
                             newPlayerItem.style.filter = "grayscale() brightness(80%)";
+                        }
+
+                        // if the player has a win streak
+                        if (playerArray[i].player.winStreak === true) {
+                            newPlayerItem.querySelector(".fire").style.display = "block";
+                        }
+                        else {
+                            newPlayerItem.querySelector(".fire").style.display = "none";
                         }
                     }
                     else {
                         newPlayerItem.querySelector(".health").style.width = "0%";
                     }
-
 
                     document.querySelector(".players-container").appendChild(newPlayerItem);
                 }
@@ -533,7 +538,6 @@ function setup() {
                 // if your player ID matches the player ID of the first player in the array we got from the database, it means you joined first or you are the only player who has joined, and you are the host or controller of the game
                 if (gameOn === false) {
                     if (playerArray[0].playerKey == playerId) {
-                        console.log("you are host");
                         host = true;
                         // set your host value to true
                         update(selfPlayerRef, {
@@ -544,7 +548,7 @@ function setup() {
                         document.querySelector(".waiting").style.display = "none";
                     }
 
-                    // everyone else
+                    // no one else sees the settings, etc.
                     else {
                         host = false;
                         changeDictionary(playerArray[0].player.dictionary);
@@ -561,6 +565,7 @@ function setup() {
                     }
                 }
 
+                // retrieve the startGame trigger from the database and start the game
                 if (playerArray[0].player.startGame === true) {
                     if (host === true) {
                         update(ref(db, "players/" + playerArray[0].playerKey), {
@@ -571,6 +576,7 @@ function setup() {
                     startGame();
                 }
 
+                // retrieve the endGame trigger from the database and end the game
                 if (playerArray[0].player.endGame === true) {
                     if (host === true) {
                         update(ref(db, "players/" + playerArray[0].playerKey), {
@@ -581,6 +587,7 @@ function setup() {
                     endGame();
                 }
 
+                // retrieve the player's turn from the host
                 playerTurn = playerArray[0].player.playerTurn;
                 // get the index number of your player object in the playerArray
                 const myPlayerIndex = playerArray.findIndex(player => player.playerKey === playerId);
@@ -589,6 +596,7 @@ function setup() {
                 // check if it's your turn
                 if (gameOn === true) {
                     if (playerArray[0].player.playerTurn == myPlayerIndex) {
+                        // if it's your turn, display it as so
                         textInput.style.display = "inline";
                         textInput.focus();
                         yourTurn = true;
@@ -601,20 +609,16 @@ function setup() {
                         displayText.style.opacity = "1";
                         document.querySelector(".prompt-container").style.opacity = "1";
 
+                        // this triggers once at the start of your turn
                         if (yourTurnTrigger === false) {
-                            if (playerArray.length > 1) {
-
-                            }
                             yourTurnTrigger = true;
 
+                            // if there is more than one player and you are alive, start the timer
                             if (playerArray.length > 1 && playerArray[myPlayerIndex].player.health > 0) {
                                 textInput.value = "";
 
-                                // when the timer runs out, knock health and go to next player
+                                // when the timer runs out, knock your health down and go to next player
                                 turnTimer = setTimeout(function () {
-                                    console.log("TIMER DONE");
-
-
                                     // next player's turn
                                     if (playerTurn >= playerArray.length - 1) {
                                         playerTurn = 0;
@@ -629,6 +633,7 @@ function setup() {
                                         prompt: prompt
                                     })
 
+                                    // lower your health based on how difficult the bigram is. The easier the prompt, the more health you lose for not answering
                                     const promptIndex = bigrams.findIndex(row => row[0] === prompt);
 
                                     let newHealth = playerArray[myPlayerIndex].player.health - (bigrams.length - promptIndex) / 15;
@@ -644,18 +649,17 @@ function setup() {
                                 }, 10000)
                             }
 
+                            // if the streak timer runs out, set your win streak back to 0
                             streakTimer = setTimeout(function () {
                                 winStreak = 0;
-                                console.log("END STREAK");
                                 update(selfPlayerRef, {
                                     winStreak: false
                                 })
                             }, 5000)
                         }
 
-                        // skip your turn if you're dead
+                        // if you're dead, skip to the next player
                         else if (playerArray.length > 1 && playerArray[myPlayerIndex].player.health <= 0 && alivePlayers.length > 0) {
-
                             if (alivePlayers.length == 1) {
                                 prompt = newPrompt();
                             }
@@ -674,11 +678,13 @@ function setup() {
                             })
                         }
                     }
+                    // if it's not your turn, display it as so
                     else {
                         textInput.style.display = "none";
                         yourTurn = false;
                         yourTurnTrigger = false;
                         clearTimeout(turnTimer);
+                        clearTimeout(streakTimer);
                         displayText.innerHTML = playerArray[playerTurn].player.typing;
                         resetTurnText = false;
                         playerTurnMessage.innerHTML = playerArray[playerTurn].player.name + "\'s turn";
@@ -693,10 +699,9 @@ function setup() {
                 prompt = playerArray[0].player.prompt;
                 document.querySelector('.prompt').textContent = prompt.toUpperCase();
 
-                // if no more players are alive, the game is over
+                // if no more players are alive, end the game
                 alivePlayers = playerArray.filter(player => player.player.health > 0);
                 setTimeout(function () {
-
                     if (host === true && alivePlayers.length <= 0 && gameOn === true) {
                         update(selfPlayerRef, {
                             endGame: true
@@ -738,14 +743,35 @@ function setup() {
             }
         })
 
+        // click the play button as the host to send the startGame trigger
         document.querySelector(".play-button").addEventListener("click", function () {
             if (host === true) {
                 update(selfPlayerRef, {
                     startGame: true
                 })
+
+                sound2.play();
             }
         })
 
+        // open and close the messages modal
+        let messagesOpen = false;
+        document.querySelector(".messages-button").addEventListener("click", function () {
+            if (!messagesOpen) {
+                document.querySelector(".messages-modal").style.right = "0vw";
+                document.querySelector(".messages-button").style.right = "calc(30vw + 10px)";
+                document.querySelector(".arrow").style.transform = "translate(-70%, -50%) rotate(-135deg)";
+                messagesOpen = true;
+            }
+            else {
+                document.querySelector(".messages-modal").style.right = "-33vw";
+                document.querySelector(".messages-button").style.right = "30px";
+                document.querySelector(".arrow").style.transform = "translate(-30%, -50%) rotate(45deg)";
+                messagesOpen = false;
+            }
+        })
+
+        // what happens when the game starts
         function startGame() {
             gameOn = true;
             document.querySelector(".slider").style.display = "none";
@@ -768,9 +794,12 @@ function setup() {
             document.querySelector(".fire").style.display = "none";
             newPrompt();
 
+            // reset and start playing
             if (host === true) {
                 update(selfPlayerRef, {
                     prompt: prompt,
+                    usedWords: [],
+                    winStreak: 0
                 })
             }
 
@@ -780,6 +809,7 @@ function setup() {
             })
         }
 
+        // what happens when the game ends
         function endGame() {
             gameOn = false;
             document.querySelector(".slider").style.display = "block";
@@ -792,6 +822,7 @@ function setup() {
             document.querySelector('.player-turn').style.display = "none";
             document.querySelector(".waiting").textContent = "Waiting for host to start";
 
+            // if you were waiting in the lobby for someone's game to end, now your player is created and you join the game
             if (waiting === false) {
                 update(selfPlayerRef, {
                     health: 100,
@@ -799,10 +830,13 @@ function setup() {
                 })
             }
             else {
-                createPlayer();
+                setTimeout(function () {
+                    waiting = false;
+                    createPlayer();
+                }, 300)
             }
 
-
+            // reset turn
             playerTurn = 0
             if (host === true) {
                 update(selfPlayerRef, {
@@ -811,11 +845,10 @@ function setup() {
             }
         }
 
+        // focus the input when switching tabs
         document.addEventListener("visibilitychange", (event) => {
             if (document.visibilityState == "visible") {
                 textInput.focus();
-            } else {
-                console.log("tab is inactive");
             }
         });
 
@@ -832,8 +865,55 @@ function setup() {
                 })
             }
         })
+
+        // send a join message to the chat when you join the game
+        document.querySelector(".messages-button").style.display = "block";
+        const joinMessageRef = push(messageRef);
+
+        set(joinMessageRef, {
+            name: name,
+            status: "join"
+        });
+
+        // send a new message in the chat
+        document.querySelector("#messageInput").addEventListener("keydown", function (e) {
+            if (e.which === 13 && this.value.length > 0) {
+                const newMessageRef = push(messageRef);
+
+                // send the message
+                set(newMessageRef, {
+                    name: name,
+                    message: this.value
+                });
+
+                this.value = "";
+            }
+        })
+
+        // when messages are added, update the messages display
+        let addedMessage;
+        onChildAdded(messageRef, (snapshot) => {
+            addedMessage = snapshot.val();
+
+            // message that has been typed
+            if (addedMessage.message) {
+                document.querySelector(".messages").innerHTML = document.querySelector(".messages").innerHTML + "<br><b>" + addedMessage.name + ":</b> " + addedMessage.message;
+            }
+            // player joining message
+            else if (addedMessage.status == "join" && addedMessage.name !== name) {
+                document.querySelector(".messages").innerHTML = document.querySelector(".messages").innerHTML + "<br><span style='color: var(--tertiary)'><b>" + addedMessage.name + "</b> has joined the game</span>";
+            }
+            // player leave message
+            else if (addedMessage.status == "leave") {
+                document.querySelector(".messages").innerHTML = document.querySelector(".messages").innerHTML + "<br><span style='color: var(--tertiary)'><b>" + addedMessage.name + "</b> has left the game</span>";
+            }
+
+            // always scroll to the most recent message
+            document.querySelector(".messages").scrollTop = document.querySelector(".messages").scrollHeight;
+        });
     }
 
+    // select which avatar you want on the main menu
     let elements = document.getElementsByClassName("avatar");
 
     function selectAvatar() {
@@ -844,6 +924,7 @@ function setup() {
             elements[i].classList.remove("avatar-select")
         }
         this.classList.add("avatar-select");
+        // global variable that is then set in your player node to reference later for displaying
         avatar = avatarNum;
     }
 
@@ -861,6 +942,7 @@ function setup() {
         sound2.play();
     })
 
+    // hit enter in the input to start also
     document.querySelector("#nameInput").addEventListener("keydown", function (e) {
         if (e.which === 13) {
             name = document.querySelector("#nameInput").value;
@@ -872,45 +954,6 @@ function setup() {
         }
     })
 
-    // hide the start menu and display the game, reset variables, call newPrompt and focus on the text field
-    function gameStart() {
-        document.querySelector(".start").style.display = "none";
-        document.querySelector(".gameplay").style.display = "flex";
-        document.querySelector(".slider").style.display = "none";
-        document.querySelector("#dropdown").style.display = "none";
-        document.querySelector(".dictionaries p").textContent = "dictionary: " + document.querySelector("#dropdown").value;
-        textInput.focus();
-        textInput.value = "";
-        displayText.innerHTML = "";
-        usedWords = [];
-        answerTimes = [];
-        answerPrompts = [];
-        answerStreaks = [];
-        winStreak = 0;
-        coinsChange = 0;
-        document.querySelector(".fire").style.display = "none";
-        newPrompt();
-        gameOn = true;
-    }
-
-    // hide the game and display the start menu
-    function gameEnd() {
-        document.querySelector(".start").style.display = "flex";
-        document.querySelector(".gameplay").style.display = "none";
-        document.querySelector(".slider").style.display = "block";
-        document.querySelector("#dropdown").style.display = "block";
-        document.querySelector(".dictionaries p").textContent = "dictionary: ";
-        gameOn = false;
-
-        // get the longest prompt answer time
-        const maxNumber = Math.max(...answerTimes);
-        const index = answerTimes.indexOf(maxNumber);
-
-        // display the time and the prompt it was used on, as well as the longest answer streak
-        document.querySelector(".stats").innerHTML = "<h2>+" + coinsChange + " coins</h2><p>You spent " + (answerTimes[index] / 1000).toFixed(2) + "s on the prompt \"" + answerPrompts[index].toUpperCase() + "\" and answered \"" + usedWords[index].toUpperCase() + "\".</p><p>Your longest streak was " + Math.max(...answerStreaks) + ".</p>";
-
-        saveStateHandler();
-    }
 
     // make sure the text input is focused when clicking anywhere in the parent div
     document.querySelector(".gameplay").addEventListener("click", function () {
@@ -983,7 +1026,6 @@ function setup() {
                 document.querySelector("select").style.backgroundColor = "var(--secondary)";
                 document.querySelector("select").style.color = "var(--primary)";
                 document.querySelector(".coins").style.color = "var(--secondary)";
-                document.querySelector(".timer").style.color = "var(--secondary)";
                 document.querySelector(".dictionaries").style.color = "var(--secondary)";
                 document.querySelector(".difficulty").style.color = "var(--secondary)";
                 settingsOpen = true;
@@ -995,7 +1037,6 @@ function setup() {
             document.querySelector("select").style.backgroundColor = "var(--primary)";
             document.querySelector("select").style.color = "var(--secondary)";
             document.querySelector(".coins").style.color = "var(--primary)";
-            document.querySelector(".timer").style.color = "var(--primary)";
             document.querySelector(".dictionaries").style.color = "var(--primary)";
             document.querySelector(".difficulty").style.color = "var(--primary)";
             settingsOpen = false;
@@ -1019,7 +1060,6 @@ function setup() {
         soundCoin2.volume = volume;
         soundCoin3.volume = volume;
         soundIncorrect.volume = volume;
-
     }
 
     // randomize game colours easter egg
