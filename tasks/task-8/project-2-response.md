@@ -45,4 +45,3 @@ I like how in the CSS, it’s all separated between what screen is displayed (st
 The experience itself was like a cool weed trip. Again, the music amplified the experience, but the game on its own is a very cool adventure. 
 
 I like the visual aspect that goes along with the music; I was stuck listening to the soundtrack without even playing the game at some point, and looking at the tiny ghost moving around every 2 seconds along with the music.
-
