@@ -28,7 +28,15 @@ The mix of high range of piano notes being played, the reverb/echo, the strings 
 
 - Discuss the code:
 
+I like how the code is divided into three different files, each for its own aspect; the game itself, the main visuals, and the player.
 
+Everything is commented on in a way that is easily understandable. This allows me to see what every line does, which is very important for anyone who views the code.
+
+I like the use of 3D rendering, especially the ghosts :))
+
+The camera controls code was interesting to see, and once again, it was very straightforward to understand. 
+
+I like how in the CSS, it’s all separated between what screen is displayed (start, end screen). It’s easier to find what lines go with each screen instead of having to go through every line to find the one you’re looking for.
 
 
 
