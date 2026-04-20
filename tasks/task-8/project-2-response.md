@@ -18,17 +18,23 @@ The outro screen being pixel art is also giving an uncomfortable vibe, and it co
 
 - What I found compelling:
 
-I found this work to be very compelling and moving because of its depiction of gentrification. The idea that big corporations tend to profit from stolen culture is not acceptable and needs to be called out. I find the way it’s shown satirically to be more moving, compared to if it were displayed in a “serious”, more direct way, because it allows the user to recognize the absurdity of some museum collections on their own. The ticket prices changing depending on whether or not the user is a person of color is also very interesting, because it once again shows a type of segregation and gentrification. By increasing the price of a ticket if you are a person of color, it reinforces the idea that income is directly reliant on your skin, which, in the museum’s mind, prevents access for those people.
+The music :)
+
+I am very connected to music and anything that has to do with that, so the soundtrack really stuck with me. The music is setting an eerie ambience for the duration of the user’s gameplay, which, to me, only amplifies the emotion Yelena and Scarlett tried to convey: Curiosity.
+
+The mix of high range of piano notes being played, the reverb/echo, the strings feeling like they’re being “pulled”, the soft horn throughout the piece, it all sounds so “exploratory”. I mean that in the sense that all we want to do in this game is explore, and sate our curiosity. All I was doing during my game play was look at the trees and the lights. In a way, each object in the game (trees, lights, the two ghosts) felt like it was contributing to the music.
 
 
 
 - Discuss the code:
 
-The fact that, while everything was practically hand-drawn, the items displayed were added as transparent objects so they could be maneuvered with CSS. I like the comments for every line of the ticket container in the CSS. It allows me to understand what every line does, which is very important for anyone who views the code.
-The JS was also very simple and easy to understand, which I heavily appreciate. I like how the functions have explanations for their roles and why they are placed in that order. For example, I know that the function closeModal was written differently because it “must be OUTSIDE the DOMContentLoaded block so the HTML "onclick" can find it.”
+
 
 
 
 - Discuss the experience itself:
 
-The experience itself is very interesting and moving; it’s the kind of project that makes you either go down a rabbit hole of research or zone out for a couple of hours. It put things in perspective for me in terms of how/why museums collect cultural artifacts and if they are ethical in their acquisition/accession.
+The experience itself was like a cool weed trip. Again, the music amplified the experience, but the game on its own is a very cool adventure. 
+
+I like the visual aspect that goes along with the music; I was stuck listening to the soundtrack without even playing the game at some point, and looking at the tiny ghost moving around every 2 seconds along with the music.
+
